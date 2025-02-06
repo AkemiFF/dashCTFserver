@@ -1,0 +1,105 @@
+{
+    "title": "NexusCraft - 数字创新机构",
+    "description": "打造卓越的数字体验",
+    "nav": {
+        "home": "首页",
+        "services": "服务",
+        "projects": "项目",
+        "about": "关于我们",
+        "contact": "联系我们"
+    },
+    "hero": {
+        "subtitle": "数字创新机构",
+        "title": "打造数字卓越",
+        "description": "NexusCraft 是一家领先的网络开发机构，专注于创造卓越的数字体验。我们将创意转化为强大且可扩展的网络解决方案。",
+        "cta": {
+            "start": "启动您的项目",
+            "view": "查看我们的作品"
+        },
+        "imageAlt": "NexusCraft 项目展示"
+    },
+    "stats": {
+        "projects": "已完成项目",
+        "satisfaction": "客户满意度",
+        "developers": "专业开发者"
+    },
+    "services": {
+        "title": "我们的服务",
+        "description": "我们提供全面的数字服务，助力您的业务在现代网络环境中蓬勃发展。",
+        "webDevelopment": {
+            "title": "网页开发",
+            "description": "使用尖端技术和最佳实践构建的定制网络应用程序。"
+        },
+        "uiUxDesign": {
+            "title": "UI/UX 设计",
+            "description": "直观且引人入胜的用户界面，提供卓越的用户体验。"
+        },
+        "securitySolutions": {
+            "title": "安全解决方案",
+            "description": "实施强大的安全措施，保护您的数字资产和数据。"
+        },
+        "performanceOptimization": {
+            "title": "性能优化",
+            "description": "速度优化和性能调优，确保应用程序运行如闪电般快速。"
+        },
+        "teamAugmentation": {
+            "title": "团队扩展",
+            "description": "经验丰富的开发人员准备加入您的团队，加速项目进展。"
+        },
+        "digitalInnovation": {
+            "title": "数字创新",
+            "description": "创新解决方案，助您引领数字时代的前沿。"
+        }
+    },
+    "projects": {
+        "title": "我们的项目",
+        "description": "探索我们的创新数字解决方案组合，这些解决方案已帮助企业在数字领域取得成功。",
+        "shoplg": {
+            "title": "ShopLG",
+            "description": "一款完全响应式的电子商务解决方案，拥有高级搜索、动态过滤和通过 Stripe 集成实现的无缝结账功能。专为性能和用户体验而设计。"
+        },
+        "portfolio": {
+            "title": "作品集",
+            "description": "展示个人项目、技术专长和使用现代网络技术的创造性解决方案的个人作品集。"
+        },
+        "aftrip": {
+            "title": "Aftrip",
+            "description": "Aftrip 提供精选的旅游体验，适合寻求真实和负责任旅游的人士。探索隐藏的文化瑰宝、独特的酒店、手工艺产品和由当地专家设计的个性化旅行。"
+        }
+    },
+    "team": {
+        "title": "认识我们的团队",
+        "description": "我们多元化的专家团队致力于创造卓越的数字体验。",
+        "mirado": {
+            "name": "Jason Brad Mirado",
+            "role": "创始人兼全栈开发者",
+            "bio": "一位拥有 5 年以上全栈网络开发、数字战略和创新解决方案经验的技术企业家。"
+        },
+        "cherica": {
+            "name": "Riantsoa Chérica",
+            "role": "后端开发人员与集成商",
+            "bio": "一名专注于 API 设计和无缝集成的后端开发人员，致力于创建强大且可扩展的系统。"
+        },
+        "leomyre": {
+            "name": "Léomyre",
+            "role": "全栈开发者",
+            "bio": "专注于可扩展架构、性能优化和用户友好型网络应用的全栈开发者。"
+        }
+    },
+    "contact": {
+        "title": "联系我们",
+        "description": "准备开始您的下一个项目了吗？联系我们，获取免费咨询。",
+        "info": "联系信息",
+        "infodescription": "通过以下任一渠道联系我们",
+        "form": {
+            "name": "您的姓名",
+            "email": "您的电子邮件",
+            "subject": "主题",
+            "message": "您的信息",
+            "submit": "发送信息"
+        }
+    },
+    "footer": {
+        "copyright": "© 2024 NexusCraft。保留所有权利。"
+    }
+}
