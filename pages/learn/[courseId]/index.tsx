@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { useParams } from "next/navigation"
-import Layout from "@/components/layout"
 import { CourseModule } from "@/components/course-module"
+import Layout from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import type { Course } from "@/types/course"
+import { useParams } from "next/navigation"
+import { useState } from "react"
 
 // This would typically come from an API call
 const mockCourse: Course = {
@@ -68,7 +68,7 @@ const mockCourse: Course = {
 
 export default function CoursePage() {
   const params = useParams()
-  const courseId = params.courseId as string
+  // const courseId = params.courseId as string
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0)
   const [showQuiz, setShowQuiz] = useState(false)
   const [quizAnswers, setQuizAnswers] = useState<number[]>([])

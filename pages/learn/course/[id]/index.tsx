@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
 import Layout from "@/components/layout"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import type { Course } from "@/types/course"
+import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 // This would typically come from an API call
 const mockFetchCourse = async (id: string): Promise<Course> => {
@@ -62,7 +62,7 @@ const mockFetchCourse = async (id: string): Promise<Course> => {
 
 export default function CourseDetailsPage() {
   const params = useParams()
-  const courseId = params.id as string
+  const courseId = params?.id as string ?? "1"
   const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
 

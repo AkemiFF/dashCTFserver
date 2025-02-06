@@ -1,5 +1,6 @@
 "use client"
 
+import Layout from "@/components/layout"
 import { QuestionForm } from "@/components/question-form"
 import { QuestionSummary } from "@/components/question-summary"
 import { Button } from "@/components/ui/button"
@@ -7,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import Layout from "@/components/layout"
 import { PlusCircle } from "lucide-react"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -60,7 +60,8 @@ const mockFetchQCM = async (id: string): Promise<QCM> => {
 
 export default function QCMEditorPage() {
   const params = useParams()
-  const id = params.id as string
+  const id = params?.id as string ?? "1"
+
 
   const [qcm, setQcm] = useState<QCM | null>(null)
   const [loading, setLoading] = useState(true)
