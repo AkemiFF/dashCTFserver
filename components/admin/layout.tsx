@@ -1,4 +1,5 @@
 import { ThemeProvider } from "next-themes"
+import Head from "next/head"
 import type { ReactNode } from "react"
 import Aside from "./aside"
 import Header from "./header"
@@ -6,7 +7,9 @@ import Header from "./header"
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-
+      <Head>
+        <title>Hackitech.co</title>
+      </Head>
       <div className="flex h-screen bg-background bg-gradient-to-br from-background to-muted">
         <Aside />
         <div className="flex-1 flex flex-col overflow-hidden">

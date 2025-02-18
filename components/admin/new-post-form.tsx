@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { EmojiPicker } from "@/components/admin/emoji-picker"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { EmojiPicker } from "@/components/emoji-picker"
-import { Image, FileImage } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { FileImage } from "lucide-react"
+import { useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
 
 interface NewPostFormProps {

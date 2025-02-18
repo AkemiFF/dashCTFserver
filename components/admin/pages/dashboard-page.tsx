@@ -1,8 +1,8 @@
-import { ChartArea } from "@/components/chart-area"
-import { ChartBar } from "@/components/chart-bar"
-import { ChartLine } from "@/components/chart-line"
-import { StatsCard } from "@/components/stats-card"
-import Layout from "@/components/layout"
+import { ChartArea } from "@/components/admin/chart-area"
+import { ChartBar } from "@/components/admin/chart-bar"
+import { ChartLine } from "@/components/admin/chart-line"
+import Layout from "@/components/admin/layout"
+import { StatsCard } from "@/components/admin/stats-card"
 
 export default function DashboardPage() {
   return (

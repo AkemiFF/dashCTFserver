@@ -17,37 +17,36 @@ import { usePathname } from "next/navigation"
 
 export default function Aside() {
   const pathname = usePathname()
-
+  const admin_url = 'private-zone-0x8a7b6c'
   const navItems = [
     {
       section: "PLATEFORME",
       items: [
-        { href: "/", icon: Home, label: "Tableau de bord" },
-        { href: "/challenges", icon: Flag, label: "Défis" },
-        { href: "/leaderboard", icon: Award, label: "Classement" },
-        { href: "/learn", icon: Book, label: "Apprentissage" },
+        { href: `/${admin_url}/`, icon: Home, label: "Tableau de bord" },
+        { href: `/${admin_url}/challenges`, icon: Flag, label: "Défis" },
+        { href: `/${admin_url}/leaderboard`, icon: Award, label: "Classement" },
+        { href: `/${admin_url}/learn`, icon: Book, label: "Apprentissage" },
         // { href: "/qcm-creator", icon: FileQuestion, label: "Créateur de QCM" },
-        { href: "/qcm-list", icon: List, label: "QCM" },
+        { href: `/${admin_url}/qcm-list`, icon: List, label: "QCM" },
       ],
     },
     {
       section: "COMMUNAUTÉ",
       items: [
-        { href: "/feed", icon: FileText, label: "Fil d'actualité" },
-        { href: "/messages", icon: MessageSquare, label: "Messages" },
+        { href: `/${admin_url}/feed`, icon: FileText, label: "Fil d'actualité" },
+        { href: `/${admin_url}/messages`, icon: MessageSquare, label: "Messages" },
         // { href: "/users", icon: Users, label: "Utilisateurs" },
-        { href: "/alerts", icon: Bell, label: "Alertes" },
+        { href: `/${admin_url}/alerts`, icon: Bell, label: "Alertes" },
       ],
     },
     {
       section: "ADMINISTRATION",
       items: [
         // { href: "/challenge-management", icon: Target, label: "Gestion des défis" },
-        { href: "/users", icon: Users, label: "Gestion des utilisateurs" },
+        { href: `/${admin_url}/users`, icon: Users, label: "Gestion des utilisateurs" },
         // { href: "/security", icon: Shield, label: "Sécurité" },
-        { href: "/admin-profile", icon: User, label: "Profil" },
-        { href: "/settings", icon: Settings, label: "Paramètres" },
-
+        { href: `/${admin_url}/admin-profile`, icon: User, label: "Profil" },
+        { href: `/${admin_url}/settings`, icon: Settings, label: "Paramètres" },
       ],
     },
   ]
