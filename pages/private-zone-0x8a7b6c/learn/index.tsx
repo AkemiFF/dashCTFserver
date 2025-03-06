@@ -44,13 +44,13 @@ export default function LearnPage() {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold tracking-tight">Apprentissage</h1>
           <div className="space-x-4">
-            <Link href="/learn/add-course">
+            <Link href="learn/add-course">
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Ajouter un cours
               </Button>
             </Link>
-            <Link href="/learn/add-module">
+            <Link href="learn/add-module">
               <Button variant="outline">
                 <BookOpen className="mr-2 h-4 w-4" />
                 Ajouter un module

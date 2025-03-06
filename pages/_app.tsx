@@ -1,10 +1,24 @@
-import { appWithTranslation } from 'next-i18next';
+import UsersLayout from '@/components/layout/UserLayout';
+import '@uiw/react-markdown-preview/markdown.css';
+import '@uiw/react-md-editor/markdown-editor.css';
 import type { AppProps } from 'next/app';
-// import nextI18NextConfig from '../next-i18next.config.js'
+import { useRouter } from 'next/router';
+import '../i18n';
+import '../styles/globals.css';
 import './globals.css';
-const MyApp = ({ Component, pageProps }: AppProps) => (
-  <Component {...pageProps} />
-)
 
-// https://github.com/i18next/next-i18next#unserializable-configs
-export default appWithTranslation(MyApp /*, nextI18NextConfig */)
+const MyApp = ({ Component, pageProps }: AppProps) => {
+  const router = useRouter();
+
+  const isUsersPage = router.pathname.startsWith('/users');
+
+  return isUsersPage ? (
+    <UsersLayout>
+      <Component {...pageProps} />
+    </UsersLayout>
+  ) : (
+    <Component {...pageProps} />
+  );
+}
+
+export default MyApp;
