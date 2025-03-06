@@ -20,6 +20,19 @@ const nextConfig = {
   typescript: {
     tsconfigPath,
   },
+  webpack: (config) => {
+    // Handle CSS imports from @uiw/react-md-editor
+    // config.module.rules.push({
+    //   test: /\.css$/i,
+    //   issuer: { and: [/\.(js|ts|md)x?$/] },
+    //   use: ['style-loader', 'css-loader'],
+    // });
+
+    // This is necessary for the markdown editor to work properly
+    config.resolve.fallback = { fs: false };
+
+    return config;
+  },
 }
 
 module.exports = nextConfig
