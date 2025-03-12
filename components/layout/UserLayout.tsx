@@ -1,5 +1,6 @@
 import Head from "next/head";
-import { Header } from "../client/header";
+import { Footer } from "../client/footer";
+import { SiteHeader } from "../site-header";
 
 export default function UsersLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,9 +9,10 @@ export default function UsersLayout({ children }: { children: React.ReactNode })
         <title>Hackitech.co</title>
       </Head>
       <div className="users-layout">
-        <Header />
+        <SiteHeader unreadNotifications={3} />
+
         <main>{children}</main>
-        <footer>Users Footer</footer>
+        <Footer />
       </div></>
   );
 }
