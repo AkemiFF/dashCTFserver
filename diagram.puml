@@ -1,0 +1,728 @@
+@startuml Hackitech Class Diagram
+
+' Color scheme
+!define PRIMARY_COLOR #8A2BE2
+!define SECONDARY_COLOR #FF69B4
+!define BACKGROUND_COLOR #0A0A1B
+!define TEXT_COLOR #FFFFFF
+
+' Apply theme
+skinparam backgroundColor BACKGROUND_COLOR
+skinparam classBackgroundColor PRIMARY_COLOR
+skinparam classBorderColor SECONDARY_COLOR
+skinparam classFontColor TEXT_COLOR
+skinparam titleFontColor TEXT_COLOR
+skinparam packageBackgroundColor BACKGROUND_COLOR
+skinparam packageBorderColor SECONDARY_COLOR
+skinparam packageFontColor TEXT_COLOR
+skinparam stereotypeCBackgroundColor SECONDARY_COLOR
+skinparam stereotypeCBorderColor PRIMARY_COLOR
+skinparam stereotypeFontColor TEXT_COLOR
+skinparam arrowColor SECONDARY_COLOR
+skinparam noteBorderColor SECONDARY_COLOR
+skinparam noteBackgroundColor BACKGROUND_COLOR
+skinparam noteFontColor TEXT_COLOR
+
+title Hackitech - Social Platform for Hackers & Developers
+
+' Enumerations
+enum UserRole {
+  STUDENT
+  MENTOR
+  ADMINISTRATOR
+  MODERATOR
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum BadgeType {
+  ACHIEVEMENT
+  SKILL
+  PARTICIPATION
+  SPECIAL
+}
+
+enum NotificationType {
+  CHALLENGE_COMPLETED
+  NEW_FOLLOWER
+  NEW_COMMENT
+  NEW_LIKE
+  ACHIEVEMENT_UNLOCKED
+  COURSE_COMPLETED
+  EVENT_REMINDER
+  TEAM_INVITATION
+}
+
+enum SubscriptionTier {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+' Base classes and interfaces
+interface Auditable {
+  +createdAt: DateTime
+  +updatedAt: DateTime
+  +createdBy: User
+  +updatedBy: User
+}
+
+interface Searchable {
+  +search(query: string): List<Entity>
+  +getSearchIndex(): Map<String, Object>
+}
+
+abstract class BaseEntity {
+  +id: UUID
+}
+
+' User management
+class User {
+  +username: String
+  +email: String
+  +password: String {encrypted}
+  +bio: String
+  +profileImage: String
+  +coverImage: String
+  +points: Integer
+  +rank: String
+  +role: UserRole
+  +isVerified: Boolean
+  +lastLogin: DateTime
+  +registrationDate: DateTime
+  +subscriptionTier: SubscriptionTier
+  +subscriptionExpiryDate: DateTime
+  +twoFactorEnabled: Boolean
+  +socialLinks: Map<String, String>
+  +createAccount()
+  +editProfile()
+  +changePassword()
+  +enableTwoFactor()
+  +disableTwoFactor()
+  +subscribe(tier: SubscriptionTier)
+  +unsubscribe()
+  +resetPassword()
+  +verifyEmail()
+  +calculateRank()
+  +getActivity(): List<Activity>
+}
+
+class Student {
+  +completedChallenges: Integer
+  +completedCourses: Integer
+  +successRate: Float
+  +favoriteTopics: List<String>
+  +accessTrainingPath()
+  +participateInChallenge()
+  +publishContent()
+  +interactSocially()
+  +enrollInCourse()
+  +trackProgress()
+  +joinTeam()
+  +leaveTeam()
+  +registerForEvent()
+  +submitSolution()
+  +earnBadge()
+  +showcaseProject()
+}
+
+class Mentor {
+  +expertise: List<String>
+  +rating: Float
+  +reviewCount: Integer
+  +createContent()
+  +reviewSubmissions()
+  +mentorStudents()
+  +hostWorkshop()
+  +createChallenge()
+  +answerQuestions()
+}
+
+class Administrator {
+  +department: String
+  +permissions: List<String>
+  +manageUsers()
+  +moderateContent()
+  +createChallenge()
+  +monitorPerformance()
+  +createCourse()
+  +createModule()
+  +createQuiz()
+  +manageSubscriptions()
+  +generateReports()
+  +configureSystem()
+  +manageEvents()
+}
+
+class Moderator {
+  +assignedSections: List<String>
+  +reviewContent()
+  +handleReports()
+  +enforceGuidelines()
+  +issueWarnings()
+  +temporarilyBanUser()
+}
+
+' Authentication & Security
+class Authentication {
+  +token: String
+  +expiryDate: DateTime
+  +deviceInfo: String
+  +ipAddress: String
+  +generateToken()
+  +validateToken()
+  +revokeToken()
+  +refreshToken()
+}
+
+class Permission {
+  +name: String
+  +description: String
+  +resource: String
+  +action: String
+  +checkPermission(user: User): Boolean
+}
+
+class UserSession {
+  +sessionId: String
+  +startTime: DateTime
+  +endTime: DateTime
+  +isActive: Boolean
+  +deviceInfo: String
+  +ipAddress: String
+  +terminateSession()
+  +extendSession()
+  +getSessionDuration(): Duration
+}
+
+' Content & Learning
+class Challenge {
+  +title: String
+  +description: String
+  +difficulty: DifficultyLevel
+  +category: String
+  +points: Integer
+  +flag: String {encrypted}
+  +hints: List<String>
+  +resources: List<String>
+  +startDate: DateTime
+  +endDate: DateTime
+  +isActive: Boolean
+  +successRate: Float
+  +tags: List<String>
+  +createChallenge()
+  +updateChallenge()
+  +deleteChallenge()
+  +verifyFlag(submission: String): Boolean
+  +addHint()
+  +calculateDifficulty()
+  +getLeaderboard(): List<Submission>
+}
+
+class Submission {
+  +submittedFlag: String
+  +isCorrect: Boolean
+  +submissionDate: DateTime
+  +attemptCount: Integer
+  +timeSpent: Duration
+  +ipAddress: String
+  +verifyFlag()
+  +calculatePoints(): Integer
+  +recordAttempt()
+  +getHint()
+}
+
+class LearningPath {
+  +title: String
+  +description: String
+  +difficulty: DifficultyLevel
+  +estimatedHours: Integer
+  +prerequisites: List<String>
+  +courses: List<Course>
+  +challenges: List<Challenge>
+  +completionBadge: Badge
+  +createPath()
+  +updatePath()
+  +deletePath()
+  +addCourse()
+  +removeCourse()
+  +addChallenge()
+  +removeChallenge()
+  +getProgress(user: User): Float
+}
+
+class Course {
+  +title: String
+  +description: String
+  +difficulty: DifficultyLevel
+  +category: String
+  +tags: List<String>
+  +author: User
+  +estimatedHours: Integer
+  +requiresSubscription: Boolean
+  +prerequisites: List<String>
+  +modules: List<Module>
+  +enrollmentCount: Integer
+  +rating: Float
+  +reviewCount: Integer
+  +completionBadge: Badge
+  +addCourse()
+  +editCourse()
+  +deleteCourse()
+  +publishCourse()
+  +unpublishCourse()
+  +addModule()
+  +removeModule()
+  +getProgress(user: User): Float
+}
+
+class Module {
+  +title: String
+  +content: String
+  +videoUrl: String
+  +resources: List<String>
+  +estimatedMinutes: Integer
+  +order: Integer
+  +quizzes: List<Quiz>
+  +addModule()
+  +editModule()
+  +deleteModule()
+  +addQuiz()
+  +removeQuiz()
+  +markCompleted(user: User)
+}
+
+class Quiz {
+  +title: String
+  +description: String
+  +timeLimit: Integer
+  +passingScore: Integer
+  +questions: List<Question>
+  +isRandomized: Boolean
+  +addQuiz()
+  +editQuiz()
+  +deleteQuiz()
+  +gradeSubmission(answers: Map<Question, String>): Float
+  +addQuestion()
+  +removeQuestion()
+}
+
+class Question {
+  +text: String
+  +type: String
+  +options: List<String>
+  +correctAnswer: String {encrypted}
+  +points: Integer
+  +explanation: String
+  +addQuestion()
+  +editQuestion()
+  +deleteQuestion()
+  +checkAnswer(answer: String): Boolean
+}
+
+' Social Features
+class Post {
+  +title: String
+  +content: String
+  +images: List<String>
+  +attachments: List<String>
+  +postDate: DateTime
+  +editDate: DateTime
+  +visibility: String
+  +tags: List<String>
+  +likes: Integer
+  +views: Integer
+  +category: String
+  +addPost()
+  +editPost()
+  +deletePost()
+  +pinPost()
+  +reportPost()
+  +sharePost()
+}
+
+class Comment {
+  +content: String
+  +commentDate: DateTime
+  +editDate: DateTime
+  +likes: Integer
+  +parentComment: Comment
+  +addComment()
+  +editComment()
+  +deleteComment()
+  +reportComment()
+  +pinComment()
+}
+
+class SocialInteraction {
+  +type: String
+  +timestamp: DateTime
+  +likeContent()
+  +commentContent()
+  +followUser()
+  +unfollowUser()
+  +sendMessage()
+  +shareContent()
+  +reportContent()
+  +blockUser()
+  +unblockUser()
+}
+
+class Message {
+  +content: String
+  +sentDate: DateTime
+  +readDate: DateTime
+  +isRead: Boolean
+  +attachments: List<String>
+  +sendMessage()
+  +markAsRead()
+  +deleteMessage()
+  +forwardMessage()
+}
+
+class Conversation {
+  +participants: List<User>
+  +lastMessageDate: DateTime
+  +isGroupChat: Boolean
+  +groupName: String
+  +groupImage: String
+  +createConversation()
+  +addParticipant()
+  +removeParticipant()
+  +getMessages(): List<Message>
+  +markAllAsRead()
+}
+
+' Gamification & Achievements
+class Score {
+  +points: Integer
+  +rank: String
+  +category: String
+  +updateRank()
+  +addPoints(amount: Integer)
+  +deductPoints(amount: Integer)
+  +getHistory(): List<ScoreHistory>
+}
+
+class ScoreHistory {
+  +points: Integer
+  +reason: String
+  +timestamp: DateTime
+  +challenge: Challenge
+  +course: Course
+}
+
+class Badge {
+  +name: String
+  +description: String
+  +image: String
+  +type: BadgeType
+  +criteria: String
+  +rarity: String
+  +awardDate: DateTime
+  +awardBadge(user: User)
+  +revokeBadge(user: User)
+  +checkEligibility(user: User): Boolean
+}
+
+class Achievement {
+  +name: String
+  +description: String
+  +image: String
+  +points: Integer
+  +isSecret: Boolean
+  +criteria: String
+  +unlockedDate: DateTime
+  +unlockAchievement(user: User)
+  +checkProgress(user: User): Float
+}
+
+class Leaderboard {
+  +category: String
+  +timeframe: String
+  +refreshDate: DateTime
+  +getTopUsers(limit: Integer): List<User>
+  +getUserRank(user: User): Integer
+  +refreshLeaderboard()
+  +filterByCategory(category: String): List<User>
+}
+
+' Teams & Collaboration
+class Team {
+  +name: String
+  +description: String
+  +logo: String
+  +members: List<User>
+  +owner: User
+  +creationDate: DateTime
+  +isPrivate: Boolean
+  +inviteCode: String
+  +createTeam()
+  +updateTeam()
+  +deleteTeam()
+  +inviteMember()
+  +removeMember()
+  +promoteToAdmin()
+  +demoteFromAdmin()
+  +participateInEvent()
+}
+
+class TeamInvitation {
+  +team: Team
+  +invitedUser: User
+  +invitedBy: User
+  +invitationDate: DateTime
+  +expiryDate: DateTime
+  +status: String
+  +sendInvitation()
+  +acceptInvitation()
+  +declineInvitation()
+  +cancelInvitation()
+}
+
+' Events & Activities
+class Event {
+  +title: String
+  +description: String
+  +startDate: DateTime
+  +endDate: DateTime
+  +location: String
+  +isVirtual: Boolean
+  +meetingLink: String
+  +maxParticipants: Integer
+  +currentParticipants: Integer
+  +organizer: User
+  +eventType: String
+  +tags: List<String>
+  +createEvent()
+  +updateEvent()
+  +cancelEvent()
+  +registerParticipant()
+  +unregisterParticipant()
+  +sendReminders()
+}
+
+class CTFEvent extends Event {
+  +challenges: List<Challenge>
+  +teams: List<Team>
+  +prizes: List<String>
+  +leaderboard: Leaderboard
+  +createCTF()
+  +addChallenge()
+  +removeChallenge()
+  +startCompetition()
+  +endCompetition()
+  +announceWinners()
+}
+
+class Workshop extends Event {
+  +presenter: User
+  +materials: List<String>
+  +prerequisites: List<String>
+  +recordingUrl: String
+  +createWorkshop()
+  +uploadMaterials()
+  +startRecording()
+  +stopRecording()
+  +shareRecording()
+}
+
+class Activity {
+  +user: User
+  +type: String
+  +description: String
+  +timestamp: DateTime
+  +relatedEntity: BaseEntity
+  +isPublic: Boolean
+  +recordActivity()
+  +getActivityFeed(user: User): List<Activity>
+}
+
+' Notifications & Communication
+class Notification {
+  +user: User
+  +type: NotificationType
+  +message: String
+  +readStatus: Boolean
+  +timestamp: DateTime
+  +relatedEntity: BaseEntity
+  +actionUrl: String
+  +sendNotification()
+  +markAsRead()
+  +markAsUnread()
+  +deleteNotification()
+}
+
+class ChatBot {
+  +name: String
+  +avatar: String
+  +capabilities: List<String>
+  +assistUser(query: String): String
+  +suggestResources(topic: String): List<String>
+  +answerFAQ(question: String): String
+  +guideNewUser()
+  +recommendChallenges(user: User): List<Challenge>
+}
+
+class Newsletter {
+  +title: String
+  +content: String
+  +sendDate: DateTime
+  +recipients: List<User>
+  +openRate: Float
+  +clickRate: Float
+  +createNewsletter()
+  +sendNewsletter()
+  +scheduleNewsletter()
+  +trackEngagement()
+}
+
+' Projects & Showcases
+class Project {
+  +title: String
+  +description: String
+  +repositoryUrl: String
+  +demoUrl: String
+  +images: List<String>
+  +technologies: List<String>
+  +owner: User
+  +collaborators: List<User>
+  +visibility: String
+  +likes: Integer
+  +views: Integer
+  +createProject()
+  +updateProject()
+  +deleteProject()
+  +addCollaborator()
+  +removeCollaborator()
+  +showcaseProject()
+}
+
+class Skill {
+  +name: String
+  +category: String
+  +level: Integer
+  +endorsements: Integer
+  +addSkill()
+  +updateSkillLevel()
+  +removeSkill()
+  +endorseSkill()
+}
+
+' Analytics & Reporting
+class Analytics {
+  +generateUserReport()
+  +generateContentReport()
+  +generateEngagementReport()
+  +trackUserActivity()
+  +analyzePerformance()
+  +predictTrends()
+}
+
+class Report {
+  +type: String
+  +data: Map<String, Object>
+  +generatedDate: DateTime
+  +format: String
+  +generateReport()
+  +exportReport()
+  +scheduleReport()
+}
+
+' Relationships
+User <|-- Student
+User <|-- Mentor
+User <|-- Administrator
+User <|-- Moderator
+
+User "1" *-- "many" Authentication : has
+User "1" *-- "many" UserSession : has
+User "1" *-- "many" Permission : has
+User "1" *-- "1" Score : has
+User "1" *-- "many" Badge : earns
+User "1" *-- "many" Achievement : unlocks
+User "1" *-- "many" Skill : possesses
+User "1" *-- "many" Activity : generates
+User "1" *-- "many" Notification : receives
+User "1" o-- "many" Project : creates
+User "1" o-- "many" Post : publishes
+User "1" o-- "many" Comment : writes
+User "many" -- "many" Team : joins
+User "many" -- "many" Event : participates
+
+Student "many" -- "many" Challenge : participates
+Student "many" -- "many" Course : enrolls
+Student "many" -- "many" LearningPath : follows
+
+Mentor "many" -- "many" Challenge : creates
+Mentor "many" -- "many" Course : creates
+Mentor "many" -- "many" Workshop : presents
+
+Administrator -- User : manages
+Administrator -- Challenge : manages
+Administrator -- Course : manages
+Administrator -- Event : organizes
+Administrator -- Report : generates
+
+Moderator -- Post : moderates
+Moderator -- Comment : moderates
+Moderator -- User : moderates
+
+Challenge "1" *-- "many" Submission : receives
+Challenge "many" -- "many" LearningPath : included in
+Challenge "many" -- "many" CTFEvent : featured in
+
+Course "1" *-- "many" Module : contains
+Module "1" *-- "many" Quiz : includes
+Quiz "1" *-- "many" Question : contains
+
+Post "1" *-- "many" Comment : has
+Post "many" -- "many" SocialInteraction : receives
+
+User "1" -- "many" Message : sends
+Message "many" -- "1" Conversation : belongs to
+Conversation "1" -- "many" User : involves
+
+Team "1" -- "many" TeamInvitation : sends
+TeamInvitation "many" -- "1" User : targets
+Team "many" -- "many" CTFEvent : competes in
+
+Event <|-- CTFEvent
+Event <|-- Workshop
+
+Leaderboard "1" -- "many" User : ranks
+Leaderboard "1" -- "1" CTFEvent : tracks
+
+Project "many" -- "many" User : collaborates with
+Project "many" -- "many" Skill : utilizes
+
+BaseEntity <|-- User
+BaseEntity <|-- Challenge
+BaseEntity <|-- Course
+BaseEntity <|-- Post
+BaseEntity <|-- Team
+BaseEntity <|-- Event
+BaseEntity <|-- Project
+
+Auditable <|.. User
+Auditable <|.. Challenge
+Auditable <|.. Course
+Auditable <|.. Post
+Auditable <|.. Team
+Auditable <|.. Event
+
+Searchable <|.. User
+Searchable <|.. Challenge
+Searchable <|.. Course
+Searchable <|.. Post
+Searchable <|.. Team
+Searchable <|.. Project
+
+@enduml
+
