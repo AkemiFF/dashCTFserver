@@ -7,7 +7,6 @@ import Document, {
   NextScript,
 } from 'next/document';
 import i18nextConfig from '../next-i18next.config';
-
 export const metadata: Metadata = {
   title: "Admin Hackitheck",
   description: "Tableau de bord de Hackitheck",
