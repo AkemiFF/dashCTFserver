@@ -26,7 +26,7 @@ export function UserDialog({ user, onClose }: UserDialogProps) {
 
   return (
     <Dialog open={!!user} onOpenChange={onClose}>
-      <DialogContent className="bg-[#0A0A1B] border-white/10 text-white">
+      <DialogContent className="bg-[#0A0A1B] border-white/10 text-white max-w-md">
         <DialogHeader>
           <DialogTitle>Profil du Hacker</DialogTitle>
         </DialogHeader>

@@ -17,7 +17,7 @@ export function LeaderboardTabs() {
 
   return (
     <Tabs defaultValue="all" className="space-y-8" onValueChange={setSelectedRank}>
-      <TabsList className="bg-white/5 border border-white/10 p-1">
+      <TabsList className="bg-white/5 border border-white/10 p-1 w-full flex justify-start overflow-x-auto">
         {ranks.map((rank) => (
           <TabsTrigger
             key={rank.id}
@@ -28,14 +28,16 @@ export function LeaderboardTabs() {
               text-gray-400
               hover:text-white
               transition-colors
+              flex-1 md:flex-none
             `}
           >
             {rank.label}
+            {rank.description && <span className="ml-2 text-xs opacity-70 hidden md:inline">({rank.description})</span>}
           </TabsTrigger>
         ))}
       </TabsList>
       {ranks.map((rank) => (
-        <TabsContent key={rank.id} value={rank.id}>
+        <TabsContent key={rank.id} value={rank.id} className="mt-6">
           <LeaderboardTable rank={rank.id} />
         </TabsContent>
       ))}

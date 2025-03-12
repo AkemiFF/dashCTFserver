@@ -152,7 +152,7 @@ const mockUsers: User[] = [
     joinedDate: "2023-12-01",
     avatar: "/placeholder.svg",
   },
-];
+]
 
 interface LeaderboardTableProps {
   rank: string
@@ -166,7 +166,8 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
   return (
     <>
       <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 text-gray-400 text-sm">
+        {/* Table Header - Desktop */}
+        <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-white/10 text-gray-400 text-sm">
           <div className="col-span-1">Rang</div>
           <div className="col-span-3">Utilisateur</div>
           <div className="col-span-2">Points</div>
@@ -174,13 +175,69 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
           <div className="col-span-2">Taux de Réussite</div>
           <div className="col-span-2">Actions</div>
         </div>
+
+        {/* Table Rows */}
         {filteredUsers.map((user) => (
           <div
             key={user.id}
-            className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 items-center hover:bg-white/5 transition-colors"
+            className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-white/10 items-center hover:bg-white/5 transition-colors"
           >
-            <div className="col-span-1 font-mono text-gray-400">#{user.rank}</div>
-            <div className="col-span-3 flex items-center gap-3">
+            {/* Mobile View */}
+            <div className="md:hidden space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="font-mono text-gray-400">#{user.rank}</div>
+                  <Avatar>
+                    <AvatarImage src={user.avatar} />
+                    <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="font-semibold text-white">{user.name}</div>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={`
+                    ${
+                      user.category === "S"
+                        ? "text-yellow-400 border-yellow-400/20"
+                        : user.category === "A"
+                          ? "text-purple-400 border-purple-400/20"
+                          : user.category === "B"
+                            ? "text-blue-400 border-blue-400/20"
+                            : "text-gray-400 border-gray-400/20"
+                    }
+                  `}
+                >
+                  Rang {user.category}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                <div>
+                  <div className="text-gray-400">Points</div>
+                  <div className="font-mono text-purple-400">{user.points.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-gray-400">Défis</div>
+                  <div>{user.completedChallenges}</div>
+                </div>
+                <div>
+                  <div className="text-gray-400">Réussite</div>
+                  <div>{user.successRate}%</div>
+                </div>
+              </div>
+
+              <Button
+                variant="ghost"
+                className="w-full hover:bg-purple-500/10 hover:text-purple-400"
+                onClick={() => setSelectedUser(user)}
+              >
+                Voir le profil
+              </Button>
+            </div>
+
+            {/* Desktop View */}
+            <div className="col-span-1 font-mono text-gray-400 hidden md:block">#{user.rank}</div>
+            <div className="col-span-3 flex items-center gap-3 hidden md:flex">
               <Avatar>
                 <AvatarImage src={user.avatar} />
                 <AvatarFallback>{user.name[0]}</AvatarFallback>
@@ -190,13 +247,14 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
                 <Badge
                   variant="outline"
                   className={`
-                    ${user.category === "S"
-                      ? "text-yellow-400 border-yellow-400/20"
-                      : user.category === "A"
-                        ? "text-purple-400 border-purple-400/20"
-                        : user.category === "B"
-                          ? "text-blue-400 border-blue-400/20"
-                          : "text-gray-400 border-gray-400/20"
+                    ${
+                      user.category === "S"
+                        ? "text-yellow-400 border-yellow-400/20"
+                        : user.category === "A"
+                          ? "text-purple-400 border-purple-400/20"
+                          : user.category === "B"
+                            ? "text-blue-400 border-blue-400/20"
+                            : "text-gray-400 border-gray-400/20"
                     }
                   `}
                 >
@@ -204,10 +262,12 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
                 </Badge>
               </div>
             </div>
-            <div className="col-span-2 font-mono text-purple-400">{user.points.toLocaleString()} pts</div>
-            <div className="col-span-2 text-gray-400">{user.completedChallenges}</div>
-            <div className="col-span-2 text-gray-400">{user.successRate}%</div>
-            <div className="col-span-2">
+            <div className="col-span-2 font-mono text-purple-400 hidden md:block">
+              {user.points.toLocaleString()} pts
+            </div>
+            <div className="col-span-2 text-gray-400 hidden md:block">{user.completedChallenges}</div>
+            <div className="col-span-2 text-gray-400 hidden md:block">{user.successRate}%</div>
+            <div className="col-span-2 hidden md:block">
               <Button
                 variant="ghost"
                 className="hover:bg-purple-500/10 hover:text-purple-400"
@@ -219,6 +279,8 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
           </div>
         ))}
       </div>
+
+      {/* User Dialog */}
       <UserDialog user={selectedUser} onClose={() => setSelectedUser(null)} />
     </>
   )
