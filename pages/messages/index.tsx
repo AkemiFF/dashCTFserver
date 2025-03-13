@@ -4,10 +4,11 @@ import { ContactInfo } from "@/components/contact-info"
 import { MessagePanel } from "@/components/message-panel"
 import { MessageSidebar } from "@/components/message-sidebar"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
 import { AnimatePresence, motion } from "framer-motion"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, MessageSquare, Settings, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 
 // Types
@@ -22,14 +23,13 @@ export interface Message {
     url: string
     name?: string
   }[]
-
 }
 
 export interface Contact {
   id: string
   name: string
   avatar: string
-  status: "online" | "offline" | "away" | "busy" | "typing"
+  status: "online" | "offline" | "away" | "busy"
   lastSeen?: Date
   isTyping?: boolean
   unreadCount?: number
@@ -42,6 +42,8 @@ export default function MessagesPage() {
   const [showContactInfo, setShowContactInfo] = useState(true)
   const [showSidebar, setShowSidebar] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+  const [activeTab, setActiveTab] = useState<"messages" | "contacts" | "settings">("messages")
 
   // Sample contacts data
   const [contacts, setContacts] = useState<Contact[]>([
@@ -204,25 +206,31 @@ export default function MessagesPage() {
     })
   }, [])
 
-  // Check if mobile
+  // Check screen size
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-      if (window.innerWidth < 1024) {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 640)
+      setIsTablet(window.innerWidth >= 640 && window.innerWidth < 1024)
+
+      // Adjust UI based on screen size
+      if (window.innerWidth < 640) {
+        // Mobile view
+        setShowSidebar(selectedContactId === null)
+        setShowContactInfo(false)
+      } else if (window.innerWidth >= 640 && window.innerWidth < 1024) {
+        // Tablet view
+        setShowSidebar(true)
         setShowContactInfo(false)
       } else {
-        setShowContactInfo(true)
-      }
-      if (window.innerWidth < 768) {
-        setShowSidebar(selectedContactId === null)
-      } else {
+        // Desktop view
         setShowSidebar(true)
+        setShowContactInfo(true)
       }
     }
 
-    checkIfMobile()
-    window.addEventListener("resize", checkIfMobile)
-    return () => window.removeEventListener("resize", checkIfMobile)
+    checkScreenSize()
+    window.addEventListener("resize", checkScreenSize)
+    return () => window.removeEventListener("resize", checkScreenSize)
   }, [selectedContactId])
 
   // Set default selected contact
@@ -329,6 +337,9 @@ export default function MessagesPage() {
     }, 4000)
   }
 
+  // Get total unread count
+  const totalUnreadCount = contacts.reduce((total, contact) => total + (contact.unreadCount || 0), 0)
+
   // Particles options
   const particlesOptions = {
     particles: {
@@ -367,6 +378,27 @@ export default function MessagesPage() {
 
   const selectedContact = contacts.find((contact) => contact.id === selectedContactId)
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 text-white relative overflow-hidden">
       {init && <Particles className="absolute inset-0" options={particlesOptions} />}
@@ -401,119 +433,171 @@ export default function MessagesPage() {
       </div>
 
 
-
-      <main className="container mx-auto px-0 md:px-4 pt-16 pb-4 relative z-10 h-[calc(100vh-1rem)]">
-        <div className="flex h-full rounded-xl overflow-hidden backdrop-blur-sm bg-white/5 border border-white/10">
-          {/* Mobile navigation buttons */}
-          {isMobile && selectedContactId && !showSidebar && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-20 left-4 z-20 bg-white/10 backdrop-blur-md rounded-full"
-              onClick={() => {
-                setShowSidebar(true)
-                setSelectedContactId(null)
-              }}
-            >
-              <ArrowLeft className="h-5 w-5 text-white" />
-            </Button>
-          )}
-
-          {/* Contacts sidebar */}
-          <AnimatePresence mode="wait">
-            {showSidebar && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className="w-full md:w-80 lg:w-96 border-r border-white/10 flex-shrink-0"
-              >
-                <MessageSidebar
-                  contacts={contacts}
-                  selectedContactId={selectedContactId}
-                  onSelectContact={handleContactSelect}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Message panel */}
-          <AnimatePresence mode="wait">
-            {selectedContactId && selectedContact && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex-grow flex flex-col h-full"
-              >
-                <MessagePanel
-                  contact={selectedContact}
-                  onSendMessage={handleSendMessage}
-                  onToggleInfo={() => setShowContactInfo(!showContactInfo)}
-                  showInfoButton={!isMobile}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Contact info panel */}
-          <AnimatePresence>
-            {selectedContactId && selectedContact && showContactInfo && !isMobile && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.2 }}
-                className="w-80 border-l border-white/10 flex-shrink-0 hidden lg:block"
-              >
-                <ContactInfo contact={selectedContact} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Empty state */}
-          {!selectedContactId && !isMobile && (
-            <div className="flex-grow flex items-center justify-center">
-              <div className="text-center p-8">
-                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, 0, -5, 0],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-pink-500"
-                    >
-                      <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
-                      <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
-                    </svg>
-                  </motion.div>
+      <main className="container mx-auto px-0 md:px-4 pt-20 pb-4 relative z-10 h-[calc(100vh-1rem)]">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex flex-col h-full">
+          {/* Page header with title and mobile navigation */}
+          <motion.div variants={itemVariants} className="mb-4 px-4 md:px-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mr-3">
+                  <MessageSquare className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Vos messages</h3>
-                <p className="text-white/60 max-w-md">
-                  Sélectionnez une conversation pour commencer à discuter ou démarrez une nouvelle conversation.
-                </p>
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">
+                  Messages
+                </h1>
+                {totalUnreadCount > 0 && (
+                  <span className="ml-2 bg-pink-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                    {totalUnreadCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Mobile navigation tabs */}
+              <div className="flex md:hidden space-x-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("rounded-full h-9 w-9", activeTab === "messages" && "bg-white/10")}
+                  onClick={() => setActiveTab("messages")}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("rounded-full h-9 w-9", activeTab === "contacts" && "bg-white/10")}
+                  onClick={() => setActiveTab("contacts")}
+                >
+                  <Users className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("rounded-full h-9 w-9", activeTab === "settings" && "bg-white/10")}
+                  onClick={() => setActiveTab("settings")}
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
               </div>
             </div>
-          )}
-        </div>
+          </motion.div>
+
+          {/* Main content area */}
+          <motion.div
+            variants={itemVariants}
+            className="flex-1 rounded-xl overflow-hidden backdrop-blur-sm bg-white/5 border border-white/10 flex flex-col md:flex-row"
+          >
+            {/* Mobile navigation buttons */}
+            {isMobile && selectedContactId && !showSidebar && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-24 left-4 z-20 bg-white/10 backdrop-blur-md rounded-full"
+                onClick={() => {
+                  setShowSidebar(true)
+                  setSelectedContactId(null)
+                }}
+              >
+                <ArrowLeft className="h-5 w-5 text-white" />
+              </Button>
+            )}
+
+            {/* Contacts sidebar */}
+            <AnimatePresence mode="wait">
+              {showSidebar && (
+                <motion.div
+                  initial={{ opacity: 0, x: isMobile ? -20 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? -20 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={cn("border-r border-white/10 flex-shrink-0", isMobile ? "w-full" : "w-80 lg:w-96")}
+                >
+                  <MessageSidebar
+                    contacts={contacts}
+                    selectedContactId={selectedContactId}
+                    onSelectContact={handleContactSelect}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Message panel */}
+            <AnimatePresence mode="wait">
+              {selectedContactId && selectedContact && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex-grow flex flex-col h-full"
+                >
+                  <MessagePanel
+                    contact={selectedContact}
+                    onSendMessage={handleSendMessage}
+                    onToggleInfo={() => setShowContactInfo(!showContactInfo)}
+                    showInfoButton={!isMobile && !isTablet}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Contact info panel */}
+            <AnimatePresence>
+              {selectedContactId && selectedContact && showContactInfo && !isMobile && !isTablet && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-80 border-l border-white/10 flex-shrink-0 hidden lg:block"
+                >
+                  <ContactInfo contact={selectedContact} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Empty state */}
+            {!selectedContactId && !isMobile && (
+              <div className="flex-grow flex items-center justify-center">
+                <div className="text-center p-8">
+                  <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, 0, -5, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatType: "reverse",
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-pink-500"
+                      >
+                        <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
+                        <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Vos messages</h3>
+                  <p className="text-white/60 max-w-md">
+                    Sélectionnez une conversation pour commencer à discuter ou démarrez une nouvelle conversation.
+                  </p>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
       </main>
     </div>
   )

@@ -1,10 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { initParticlesEngine } from "@tsparticles/react"
-import { loadSlim } from "@tsparticles/slim"
+import { NotificationsFilter } from "@/components/notifications-filter"
+import { NotificationsList } from "@/components/notifications-list"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import Particles, { initParticlesEngine } from "@tsparticles/react"
+import { loadSlim } from "@tsparticles/slim"
+import { motion } from "framer-motion"
+import { Bell, CheckCheck } from "lucide-react"
 import type { NextPage } from "next"
+import { useEffect, useState } from "react"
 
 // Types for notifications
 export interface Notification {
@@ -250,9 +255,9 @@ const NotificationsPage: NextPage = () => {
       prev.map((notification) =>
         notification.id === id
           ? {
-              ...notification,
-              read: true,
-            }
+            ...notification,
+            read: true,
+          }
           : notification,
       ),
     )
@@ -262,9 +267,60 @@ const NotificationsPage: NextPage = () => {
   const unreadCount = notifications.filter((notification) => !notification.read).length
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold">Notifications</h1>
-      <p>Simple notifications page with explicit types.</p>
+    <div className="relative min-h-screen bg-gradient-to-b from-gray-900 to-black">
+      {/* Particles Background */}
+      {init && <Particles id="tsparticles" options={particlesOptions} className="absolute inset-0 z-0" />}
+
+      <div className="relative z-10 container mx-auto px-4 py-8 pt-20">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white">
+                <Bell className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Notifications</h1>
+                <p className="text-gray-400">Restez informé des activités qui vous concernent</p>
+              </div>
+            </div>
+
+            {unreadCount > 0 && (
+              <Button
+                onClick={handleMarkAllAsRead}
+                variant="outline"
+                className="bg-white/5 border-white/10 hover:bg-white/10 text-white"
+              >
+                <CheckCheck className="mr-2 h-4 w-4" />
+                Tout marquer comme lu
+                {unreadCount > 0 && (
+                  <span className="ml-2 bg-pink-500 text-white text-xs rounded-full px-2 py-0.5">{unreadCount}</span>
+                )}
+              </Button>
+            )}
+          </div>
+
+          {/* Filters */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-white/5 backdrop-blur-lg rounded-xl p-2 border border-white/10"
+          >
+            <NotificationsFilter activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          </motion.div>
+        </motion.div>
+
+        {/* Notifications List */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
+          <NotificationsList notifications={filteredNotifications} onMarkAsRead={handleMarkAsRead} />
+        </motion.div>
+      </div>
     </div>
   )
 }
