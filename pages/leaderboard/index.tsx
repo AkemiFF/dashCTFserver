@@ -1,6 +1,5 @@
 import { LeaderboardHeader } from "@/components/client/leaderboard/leaderboard-header"
 import { LeaderboardTabs } from "@/components/client/leaderboard/leaderboard-tabs"
-import { Footer } from "@/components/client/footer"
 
 export default function LeaderboardPage() {
   return (
@@ -17,8 +16,6 @@ export default function LeaderboardPage() {
             </div>
           </div>
         </div>
-
-        <Footer />
       </div>
     </div>
   )

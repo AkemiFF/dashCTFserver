@@ -96,6 +96,7 @@ export default function FriendsPage() {
 
       <main className="container mx-auto px-4 pt-24 pb-16 relative z-10">
         <div className="max-w-5xl mx-auto">
+
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-pink-500 to-purple-600 text-transparent bg-clip-text">
               Réseau de développeurs
