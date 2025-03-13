@@ -7,7 +7,11 @@ import { StoryCircle } from "@/components/story-circle"
 import { TrendingTopics } from "@/components/trending-topics"
 import { Button } from "@/components/ui/button"
 import { UserSuggestions } from "@/components/user-suggestions"
+import { authFetch } from "@/lib/api"
+import { BASE_URL } from "@/lib/host"
 import { cn } from "@/lib/utils"
+import { DefaultUserData } from "@/types/default"
+import { UserBaseData } from "@/types/users"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
 import { AnimatePresence, motion } from "framer-motion"
@@ -17,10 +21,11 @@ import { useEffect, useState } from "react"
 export default function Home() {
   const [init, setInit] = useState(false)
   const [activeView, setActiveView] = useState<"feed" | "discover" | "trending">("feed")
-
+  const [userData, setData] = useState<UserBaseData>(DefaultUserData)
   useEffect(() => {
     initParticlesEngine(async (engine) => {
-      await loadSlim(engine)
+      await fetchUserData();
+      await loadSlim(engine);
     }).then(() => {
       setInit(true)
     })
@@ -60,7 +65,19 @@ export default function Home() {
       },
     },
   }
-
+  const fetchUserData = async () => {
+    try {
+      const response = await authFetch(`${BASE_URL}/api/auth/user/`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+      const userData = await response.json();
+      setData(userData);
+      console.log("User data:", userData);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
   // Sample posts data
   const posts = [
     {
@@ -177,7 +194,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
           <div className="hidden lg:block lg:col-span-3 sticky top-24 self-start">
-            <Sidebar />
+            <Sidebar userData={userData} />
           </div>
 
           {/* Main Content */}
