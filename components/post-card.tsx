@@ -1,12 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, CheckCircle2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
+import { Bookmark, CheckCircle2, Heart, MessageCircle, MoreHorizontal, Share2 } from "lucide-react"
 import Image from "next/image"
+import { useState } from "react"
 
 interface PostCardProps {
   post: {

@@ -1,32 +1,35 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { UserBaseData } from "@/types/users"
+import { motion } from "framer-motion"
 import {
-  Home,
-  Users,
+  Bell,
   Bookmark,
   Calendar,
-  Settings,
-  HelpCircle,
-  MessageCircle,
-  Bell,
   Compass,
+  HelpCircle,
+  Home,
+  MessageCircle,
+  Settings,
   TrendingUp,
+  Users,
 } from "lucide-react"
+import { useRouter } from "next/router"
 
-export function Sidebar() {
+export function Sidebar({ userData }: { userData: UserBaseData }) {
+  const router = useRouter()
   const menuItems = [
-    { icon: Home, label: "Accueil", active: true },
-    { icon: Compass, label: "Explorer", active: false },
-    { icon: TrendingUp, label: "Tendances", active: false },
-    { icon: MessageCircle, label: "Messages", active: false, notifications: 3 },
-    { icon: Bell, label: "Notifications", active: false, notifications: 5 },
-    { icon: Bookmark, label: "Enregistrés", active: false },
-    { icon: Users, label: "Amis", active: false },
-    { icon: Calendar, label: "Événements", active: false },
+    { icon: Home, label: "Accueil", active: true, link: "/" },
+    { icon: Compass, label: "Explorer", active: false, link: "/explorer" },
+    { icon: TrendingUp, label: "Tendances", active: false, link: "/tendances" },
+    { icon: MessageCircle, label: "Messages", active: false, notifications: 3, link: "/messages" },
+    { icon: Bell, label: "Notifications", active: false, notifications: 5, link: "/notifications" },
+    { icon: Bookmark, label: "Enregistrés", active: false, link: "/enregistres" },
+    { icon: Users, label: "Amis", active: false, link: "/friends" },
+    { icon: Calendar, label: "Événements", active: false, link: "/events" },
   ]
 
   const bottomItems = [
@@ -48,21 +51,21 @@ export function Sidebar() {
             <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500 text-white">JD</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold text-white">Jean Dupont</h3>
-            <p className="text-sm text-white/60">@jeandupont</p>
+            <h3 className="font-semibold text-white">{userData.username}</h3>
+            <p className="text-sm text-white/60">@{userData.username.toLowerCase()}</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 mt-4 text-center">
           <div className="p-2 rounded-lg bg-white/5">
-            <div className="font-semibold text-white">248</div>
+            <div className="font-semibold text-white">{userData.post_count}</div>
             <div className="text-xs text-white/60">Posts</div>
           </div>
           <div className="p-2 rounded-lg bg-white/5">
-            <div className="font-semibold text-white">1.2K</div>
+            <div className="font-semibold text-white">{userData.followers_count}</div>
             <div className="text-xs text-white/60">Abonnés</div>
           </div>
           <div className="p-2 rounded-lg bg-white/5">
-            <div className="font-semibold text-white">652</div>
+            <div className="font-semibold text-white">{userData.following_count}</div>
             <div className="text-xs text-white/60">Suivis</div>
           </div>
         </div>
@@ -75,11 +78,11 @@ export function Sidebar() {
             <Button
               key={index}
               variant="ghost"
-              className={`w-full justify-start text-base font-normal ${
-                item.active
-                  ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-white"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
-              }`}
+              className={`w-full justify-start text-base font-normal ${item.active
+                ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-white"
+                : "text-white/70 hover:text-white hover:bg-white/5"
+                }`}
+              onClick={() => router.push(item.link)}
             >
               <item.icon className={`mr-3 h-5 w-5 ${item.active ? "text-pink-500" : ""}`} />
               {item.label}
