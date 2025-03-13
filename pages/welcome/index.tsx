@@ -8,6 +8,7 @@ import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
 import { motion } from "framer-motion"
 import { Brain, Flag, Shield, Terminal, Trophy, Users } from "lucide-react"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 
 export default function Welcome() {
@@ -253,7 +254,7 @@ export default function Welcome() {
               transition={{ duration: 0.7 }}
             >
               <div className="relative z-10">
-                <img
+                <Image
                   src="/placeholder.svg?height=400&width=600"
                   alt="Cybersecurity Illustration"
                   className="w-full h-auto rounded-lg"
