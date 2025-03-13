@@ -4,18 +4,23 @@ import type React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
+import { saveAuthData } from "@/lib/auth"
+import { BASE_URL } from "@/lib/host"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
 import { motion } from "framer-motion"
 import { Lock, Mail, Shield } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [init, setInit] = useState(false)
-
+  const { toast } = useToast()
+  const router = useRouter()
   useEffect(() => {
     initParticlesEngine(async (engine) => {
       await loadSlim(engine)
@@ -24,10 +29,39 @@ export default function LoginPage() {
     })
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt", { email, password })
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/token/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok")
+      }
+      const data = await response.json()
+      saveAuthData(data)
+      console.log("Login successful", data)
+      toast({
+        title: "Success",
+        description: "Login successful. Redirecting to homepage...",
+        variant: "default",
+      })
+
+      router.push("/")
+    } catch (error) {
+      console.error("Login failed", error)
+      toast({
+        title: "Error",
+        description: "Login error. Verify your credentials and try again.",
+        variant: "destructive",
+      })
+      // Handle login failure here (e.g., show error message)
+    }
   }
 
   const particlesOptions = {

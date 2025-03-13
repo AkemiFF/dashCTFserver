@@ -1,37 +1,186 @@
 "use client"
 
+import type React from "react"
+
 import { AnimatedGears } from "@/components/client/AnimatedGears"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
+import { BASE_URL } from "@/lib/host"
 import { ArrowRight, Check, Lock, Mail, Shield, User } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/router"
 import { useState } from "react"
 
 type SignupStep = "email" | "verification" | "details"
 
 export default function SignupPage() {
+  const { toast } = useToast()
   const [step, setStep] = useState<SignupStep>("email")
   const [email, setEmail] = useState("")
   const [verificationCode, setVerificationCode] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Sending verification code to", email)
-    setStep("verification")
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/register/initiate/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      })
+      if (response.ok) {
+        console.log("Verification code sent to", email)
+        toast({
+          title: "Info",
+          description: "Verification code sent to" + email,
+          variant: "default",
+        })
+        setStep("verification")
+      } else {
+        console.error("Email already used")
+        toast({
+          title: "Info",
+          description: "Email already used, Please log in.",
+          variant: "default",
+        })
+      }
+    } catch (error) {
+      console.error("Error sending verification code:", error)
+      toast({
+        title: "Error",
+        description: "An error occurred while sending the verification code",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleVerificationSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmitAttachment = async (e: React.FormEvent, file?: File) => {
     e.preventDefault()
-    console.log("Verifying code", verificationCode)
-    setStep("details")
+    setIsLoading(true)
+    try {
+      const formData = new FormData()
+      formData.append("email", email)
+      if (file) {
+        formData.append("attachment", file)
+      }
+
+      const response = await fetch(`${BASE_URL}/api/auth/register/initiate-with-attachment/`, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (response.ok) {
+        console.log("Verification code sent to", email)
+        setStep("verification")
+        toast({
+          title: "Success",
+          description: "Verification code sent to your email",
+          variant: "default",
+        })
+      } else {
+        console.error("Failed to send verification code")
+        toast({
+          title: "Error",
+          description: "Failed to send verification code",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error sending verification code:", error)
+      toast({
+        title: "Error",
+        description: "An error occurred while sending the verification code",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleSignupSubmit = (e: React.FormEvent) => {
+  const handleVerificationSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Signup attempt", { email, username, password, confirmPassword })
+    setIsLoading(true)
+    try {
+      console.log("Verifying code", verificationCode)
+      // Add verification API call here if needed
+      setStep("details")
+    } catch (error) {
+      console.error("Error verifying code:", error)
+      toast({
+        title: "Error",
+        description: "Failed to verify code",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSignupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/register/complete/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, code: verificationCode, username, password }),
+      })
+      if (response.ok) {
+        console.log("Account created successfully")
+        // Redirect to login or another page
+        toast({
+          title: "Success",
+          description: "Account created successfully. Redirecting to login...",
+          variant: "default",
+        })
+        setTimeout(() => {
+          router.push("/login")
+        }, 1000)
+      } else if (response.status === 400) {
+        console.error("Invalid verification code")
+        setStep("verification")
+        toast({
+          title: "Error",
+          description: "Invalid verification code",
+          variant: "destructive",
+        })
+      } else if (response.status === 505) {
+        console.error("Username already used, please choose another one")
+        // setStep("verification")
+        toast({
+          title: "Error",
+          description: "Username already used, please choose another one",
+          variant: "destructive",
+        })
+      } else {
+        console.error("Failed to create account")
+        toast({
+          title: "Error",
+          description: "Failed to create account",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error creating account:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -89,8 +238,40 @@ export default function SignupPage() {
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                Send Verification Code <ArrowRight className="ml-2 w-4 h-4" />
+              <Button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Sending...
+                  </div>
+                ) : (
+                  <>
+                    Send Verification Code <ArrowRight className="ml-2 w-4 h-4" />
+                  </>
+                )}
               </Button>
             </form>
           )}
@@ -114,8 +295,40 @@ export default function SignupPage() {
                   <Check className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                Verify Code <ArrowRight className="ml-2 w-4 h-4" />
+              <Button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Verifying...
+                  </div>
+                ) : (
+                  <>
+                    Verify Code <ArrowRight className="ml-2 w-4 h-4" />
+                  </>
+                )}
               </Button>
             </form>
           )}
@@ -173,8 +386,38 @@ export default function SignupPage() {
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                Create Account
+              <Button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Creating Account...
+                  </div>
+                ) : (
+                  <>Create Account</>
+                )}
               </Button>
             </form>
           )}
