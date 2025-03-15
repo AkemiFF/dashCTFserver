@@ -10,9 +10,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { authFetchAdmin } from "@/lib/api"
+import { getAdminAuthHeaderFormData } from "@/lib/auth"
+import { BASE_URL } from "@/lib/host"
 import { AlertCircle, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function AddCoursePage() {
   const router = useRouter()
@@ -29,7 +32,33 @@ export default function AddCoursePage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState("")
+  const [referenceData, setReferenceData] = useState({
+    levels: [],
+    categories: [],
+    tags: [],
+  });
+  useEffect(() => {
+    const fetchReferenceData = async () => {
+      try {
+        const response = await authFetchAdmin(`${BASE_URL}/api/learn/admin/reference-data/`)
 
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération des données de référence');
+        }
+
+        const data = await response.json();
+        setReferenceData({
+          levels: data.levels,
+          categories: data.categories,
+          tags: data.tags,
+        });
+      } catch (error) {
+        setError((error as Error).message);
+      }
+    };
+
+    fetchReferenceData();
+  }, []);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setCourseData((prev) => ({ ...prev, [name]: value }))
@@ -61,21 +90,56 @@ export default function AddCoursePage() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-    // Basic validation
+    // Validation de base
     if (!courseData.title || !courseData.description || !courseData.level || !courseData.category) {
-      setError("Veuillez remplir tous les champs obligatoires.")
-      return
+      setError('Veuillez remplir tous les champs obligatoires.');
+      return;
     }
 
-    // Here you would typically send this data to your backend
-    console.log("Course data submitted:", courseData)
+    try {
+      const formData = new FormData();
+      formData.append('title', courseData.title);
+      formData.append('description', courseData.description);
+      formData.append('level', courseData.level);
+      formData.append('category', courseData.category);
+      formData.append('duration', courseData.duration);
+      formData.append('prerequisites', courseData.prerequisites);
+      formData.append('instructor', courseData.instructor);
 
-    // Redirect to the courses page after submission
-    router.push("/admin/courses")
-  }
+      if (courseData.image) {
+        formData.append('image', courseData.image);
+      }
+
+      // Ajouter les tags
+      if (courseData.tags.length > 0) {
+        formData.append('tags', JSON.stringify(courseData.tags));
+      }
+
+      const response = await fetch(`${BASE_URL}/api/learn/admin/courses/`, {
+        method: 'POST',
+        headers: {
+          ...await getAdminAuthHeaderFormData()
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la création du cours');
+      }
+
+      const data = await response.json();
+      console.log('Cours créé avec succès:', data);
+
+      // Rediriger vers la liste des cours
+      // router.push('/admin/courses');
+    } catch (error) {
+      setError((error as Error).message);
+    }
+  };
 
   // Map French level names to English for compatibility with the courses page
   const levelMapping: Record<string, string> = {
