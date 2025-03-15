@@ -4,11 +4,16 @@ import { ActivityFeed } from "@/components/activity-feed"
 import { BadgesSection } from "@/components/badges-section"
 import { ContributionGraph } from "@/components/contribution-graph"
 import ProfileHeader from "@/components/profile-header"
+import { ProfileOnboarding } from "@/components/profile-onboarding"
 import { ProjectsSection } from "@/components/projects-section"
 import { SkillsSection } from "@/components/skills-section"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/components/ui/use-toast"
+import { authFetch } from "@/lib/api"
+import { BASE_URL } from "@/lib/host"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
 import { motion } from "framer-motion"
@@ -17,6 +22,10 @@ import { useEffect, useState } from "react"
 
 export default function ProfilePage() {
   const [init, setInit] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(true)
+  const [profileData, setProfileData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const { toast } = useToast()
 
   useEffect(() => {
     initParticlesEngine(async (engine) => {
@@ -25,6 +34,99 @@ export default function ProfilePage() {
       setInit(true)
     })
   }, [])
+
+  const fetchAllData = async () => {
+    try {
+      const response = await authFetch(`${BASE_URL}/api/auth/user/`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data")
+      }
+      const full_data = await authFetch(`${BASE_URL}/api/accounts/users/me/`)
+      if (!full_data.ok) {
+        throw new Error("Failed to fetch full_data")
+      }
+      const userData = await response.json()
+      const fullData = await full_data.json()
+
+      // Update profile data with fetched data
+      setProfileData({
+        id: fullData.id,
+        name: fullData.name || fullData.profile?.display_name || "",
+        username: fullData.username,
+        avatar: fullData.photo || "/placeholder.svg?height=150&width=150",
+        coverImage: fullData.photo || "/placeholder.svg?height=400&width=1200",
+        bio: fullData.bio || "",
+        location: fullData.profile?.location || "",
+        joinedDate: `Membre depuis ${new Date(fullData.date_joined).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}`,
+        website: fullData.website_url || "",
+        github: fullData.github_url || "",
+        level: 0,
+        contributionPoints: 0,
+        rank: fullData.role || "student",
+        followers: userData.followers_count || 0,
+        following: userData.following_count || 0,
+        posts: userData.post_count || 0,
+        skills:
+          fullData.profile?.skills?.map((skill: any) => ({
+            id: skill.id,
+            name: skill.name,
+            level: 80,
+            category: skill.skill_type,
+          })) || [],
+        user_projects:
+          fullData.user_projects?.map((project: any) => ({
+            id: project.id,
+            name: project.project_name,
+            description: project.description,
+            stars: 0,
+            forks: 0,
+            language: project.language,
+            link: project.link,
+            image: project.image || "/placeholder.svg?height=200&width=400",
+          })) || [],
+        profileCompleted: !!(fullData.bio && fullData.profile?.location),
+      })
+
+      // Set onboarding visibility based on profile completion
+      setShowOnboarding(!fullData.bio || !fullData.profile?.location)
+      setIsLoading(false)
+
+      console.log("User data:", userData)
+      console.log("User full data:", fullData)
+    } catch (error) {
+      console.error("Error fetching user data:", error)
+      setIsLoading(false)
+    }
+  }
+  // Simulate fetching user data and checking if profile is complete
+  useEffect(() => {
+    fetchAllData()
+  }, [])
+
+  const handleProfileComplete = (formData: any) => {
+    // In a real app, you would send this data to your backend
+    console.log("Profile data submitted:", formData)
+
+    // Update local state with the new profile data
+    setProfileData((prev: any) => ({
+      ...prev,
+      ...formData,
+      profileCompleted: true,
+    }))
+
+    // Store completion status in localStorage (for demo purposes)
+    localStorage.setItem("profileCompleted", "true")
+
+    // Close the onboarding dialog
+    setShowOnboarding(false)
+
+    // Show success toast
+    toast({
+      title: "Profile Updated",
+      description: "Your profile information has been successfully saved.",
+      variant: "default",
+    })
+  }
 
   const particlesOptions = {
     particles: {
@@ -61,148 +163,15 @@ export default function ProfilePage() {
     },
   }
 
-  // Sample user data
-  const userData = {
-    id: "user123",
-    name: "Alex Durand",
-    username: "0xalexcode",
-    avatar: "/placeholder.svg?height=150&width=150",
-    coverImage: "/placeholder.svg?height=400&width=1200",
-    bio: "Développeur full-stack & ethical hacker | Contributeur open source | Passionné de cybersécurité et d'IA | Toujours à la recherche de nouveaux défis techniques",
-    location: "Paris, France",
-    joinedDate: "Membre depuis Mars 2022",
-    website: "https://alexdurand.dev",
-    github: "github.com/0xalexcode",
-    gitlab: "gitlab.com/0xalexcode",
-    stackoverflow: "stackoverflow.com/users/0xalexcode",
-    hackthebox: "hackthebox.com/0xalexcode",
-    level: 42,
-    contributionPoints: 8756,
-    rank: "Expert",
-    followers: 1243,
-    following: 567,
-    posts: 89,
-    achievements: [
-      { id: 1, name: "Bug Hunter", icon: "bug", description: "A trouvé et corrigé 50 bugs critiques" },
-      {
-        id: 2,
-        name: "Open Source Hero",
-        icon: "git-branch",
-        description: "100+ contributions à des projets open source",
-      },
-      { id: 3, name: "Mentor", icon: "users", description: "A aidé 25+ développeurs débutants" },
-      { id: 4, name: "CTF Champion", icon: "flag", description: "Vainqueur de 5 compétitions Capture The Flag" },
-    ],
-    skills: [
-      { name: "JavaScript", level: 95, category: "language" },
-      { name: "TypeScript", level: 90, category: "language" },
-      { name: "Python", level: 85, category: "language" },
-      { name: "Rust", level: 75, category: "language" },
-      { name: "Go", level: 70, category: "language" },
-      { name: "React", level: 92, category: "framework" },
-      { name: "Node.js", level: 88, category: "framework" },
-      { name: "Next.js", level: 85, category: "framework" },
-      { name: "Docker", level: 80, category: "tool" },
-      { name: "Kubernetes", level: 75, category: "tool" },
-      { name: "AWS", level: 82, category: "cloud" },
-      { name: "Penetration Testing", level: 88, category: "security" },
-      { name: "Network Security", level: 85, category: "security" },
-      { name: "Cryptography", level: 78, category: "security" },
-      { name: "Reverse Engineering", level: 80, category: "security" },
-    ],
-    projects: [
-      {
-        id: 1,
-        name: "SecureAuth",
-        description: "Système d'authentification multi-facteurs open source avec support pour WebAuthn et FIDO2",
-        stars: 342,
-        forks: 87,
-        language: "TypeScript",
-        link: "https://github.com/0xalexcode/secure-auth",
-        image: "/placeholder.svg?height=200&width=400",
-      },
-      {
-        id: 2,
-        name: "NetScanPro",
-        description: "Outil avancé de scan de vulnérabilités réseau avec reporting automatisé",
-        stars: 256,
-        forks: 62,
-        language: "Python",
-        link: "https://github.com/0xalexcode/netscanpro",
-        image: "/placeholder.svg?height=200&width=400",
-      },
-      {
-        id: 3,
-        name: "BlockGuard",
-        description: "Framework de sécurité pour applications blockchain et smart contracts",
-        stars: 189,
-        forks: 45,
-        language: "Solidity/Rust",
-        link: "https://github.com/0xalexcode/blockguard",
-        image: "/placeholder.svg?height=200&width=400",
-      },
-    ],
-    recentActivity: [
-      {
-        id: 1,
-        type: "commit",
-        project: "SecureAuth",
-        description: "Ajout du support pour les clés de sécurité FIDO2",
-        timestamp: "Il y a 2 jours",
-      },
-      {
-        id: 2,
-        type: "issue",
-        project: "React Router",
-        description: "Correction d'un bug dans la gestion des routes imbriquées",
-        timestamp: "Il y a 5 jours",
-      },
-      {
-        id: 3,
-        type: "pull_request",
-        project: "TensorFlow",
-        description: "Optimisation des performances pour les modèles de NLP",
-        timestamp: "Il y a 1 semaine",
-      },
-      {
-        id: 4,
-        type: "hackathon",
-        project: "HackParis 2023",
-        description: "2ème place au challenge de cybersécurité",
-        timestamp: "Il y a 2 semaines",
-      },
-      {
-        id: 5,
-        type: "article",
-        project: "Blog personnel",
-        description: "Publication: 'Techniques avancées de reverse engineering'",
-        timestamp: "Il y a 3 semaines",
-      },
-    ],
-    badges: [
-      { id: 1, name: "Python Master", icon: "python", level: "gold" },
-      { id: 2, name: "React Expert", icon: "react", level: "gold" },
-      { id: 3, name: "Security Specialist", icon: "shield", level: "gold" },
-      { id: 4, name: "Cloud Architect", icon: "cloud", level: "silver" },
-      { id: 5, name: "Database Guru", icon: "database", level: "silver" },
-      { id: 6, name: "DevOps Engineer", icon: "server", level: "silver" },
-      { id: 7, name: "Mobile Developer", icon: "smartphone", level: "bronze" },
-      { id: 8, name: "UI/UX Designer", icon: "layout", level: "bronze" },
-    ],
-    contributionData: [
-      { month: "Jan", contributions: 45 },
-      { month: "Fév", contributions: 52 },
-      { month: "Mar", contributions: 38 },
-      { month: "Avr", contributions: 65 },
-      { month: "Mai", contributions: 78 },
-      { month: "Juin", contributions: 92 },
-      { month: "Juil", contributions: 86 },
-      { month: "Août", contributions: 74 },
-      { month: "Sep", contributions: 103 },
-      { month: "Oct", contributions: 121 },
-      { month: "Nov", contributions: 98 },
-      { month: "Déc", contributions: 110 },
-    ],
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-t-pink-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-white/70">Loading profile...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -238,10 +207,10 @@ export default function ProfilePage() {
         />
       </div>
 
-
+      <Toaster />
 
       <main className="container mx-auto px-4 pt-20 pb-16 relative z-10">
-        <ProfileHeader user={userData} />
+        {profileData && <ProfileHeader user={profileData} />}
 
         <div className="mt-8">
           <Tabs defaultValue="overview" className="w-full">
@@ -304,7 +273,20 @@ export default function ProfilePage() {
                           <Activity className="h-5 w-5 mr-2 text-pink-500" />
                           Contributions
                         </h3>
-                        <ContributionGraph data={userData.contributionData} />
+                        {profileData?.contributionData?.length > 0 ? (
+                          <ContributionGraph data={profileData.contributionData} />
+                        ) : (
+                          <div className="text-center py-8 text-white/70">
+                            <p>No contribution data available yet.</p>
+                            <Button
+                              variant="outline"
+                              className="mt-4 border-white/10 hover:bg-white/5"
+                              onClick={() => setShowOnboarding(true)}
+                            >
+                              Complete Your Profile
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </Card>
                   </motion.div>
@@ -314,7 +296,28 @@ export default function ProfilePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                   >
-                    <ProjectsSection projects={userData.projects} />
+                    {profileData?.user_projects?.length > 0 ? (
+                      <ProjectsSection projects={profileData.user_projects} />
+                    ) : (
+                      <Card className="backdrop-blur-xl bg-white/5 border border-white/10 overflow-hidden">
+                        <div className="p-6">
+                          <h3 className="text-xl font-bold mb-4 flex items-center">
+                            <GitBranch className="h-5 w-5 mr-2 text-pink-500" />
+                            Projects
+                          </h3>
+                          <div className="text-center py-8 text-white/70">
+                            <p>No projects added yet.</p>
+                            <Button
+                              variant="outline"
+                              className="mt-4 border-white/10 hover:bg-white/5"
+                              onClick={() => setShowOnboarding(true)}
+                            >
+                              Add Your Projects
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
                   </motion.div>
                 </div>
 
@@ -330,25 +333,38 @@ export default function ProfilePage() {
                           <Terminal className="h-5 w-5 mr-2 text-pink-500" />
                           Top Compétences
                         </h3>
-                        <div className="space-y-4">
-                          {userData.skills.slice(0, 5).map((skill) => (
-                            <div key={skill.name}>
-                              <div className="flex justify-between mb-1">
-                                <span className="text-sm font-medium">{skill.name}</span>
-                                <span className="text-sm font-medium">{skill.level}%</span>
+                        {profileData?.skills?.length > 0 ? (
+                          <div className="space-y-4">
+                            {profileData.skills.slice(0, 5).map((skill: any) => (
+                              <div key={skill.name}>
+                                <div className="flex justify-between mb-1">
+                                  <span className="text-sm font-medium">{skill.name}</span>
+                                  <span className="text-sm font-medium">{skill.level}%</span>
+                                </div>
+                                <div className="w-full bg-white/10 rounded-full h-2.5">
+                                  <div
+                                    className="bg-gradient-to-r from-pink-500 to-purple-600 h-2.5 rounded-full"
+                                    style={{ width: `${skill.level}%` }}
+                                  ></div>
+                                </div>
                               </div>
-                              <div className="w-full bg-white/10 rounded-full h-2.5">
-                                <div
-                                  className="bg-gradient-to-r from-pink-500 to-purple-600 h-2.5 rounded-full"
-                                  style={{ width: `${skill.level}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <Button variant="ghost" className="w-full mt-4 border border-white/10 hover:bg-white/5">
-                          Voir toutes les compétences
-                        </Button>
+                            ))}
+                            <Button variant="ghost" className="w-full mt-4 border border-white/10 hover:bg-white/5">
+                              Voir toutes les compétences
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="text-center py-4 text-white/70">
+                            <p>No skills added yet.</p>
+                            <Button
+                              variant="outline"
+                              className="mt-4 border-white/10 hover:bg-white/5"
+                              onClick={() => setShowOnboarding(true)}
+                            >
+                              Add Your Skills
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </Card>
                   </motion.div>
@@ -358,7 +374,21 @@ export default function ProfilePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
                   >
-                    <BadgesSection badges={userData.badges} />
+                    {profileData?.badges?.length > 0 ? (
+                      <BadgesSection badges={profileData.badges} />
+                    ) : (
+                      <Card className="backdrop-blur-xl bg-white/5 border border-white/10 overflow-hidden">
+                        <div className="p-6">
+                          <h3 className="text-xl font-bold mb-4 flex items-center">
+                            <Trophy className="h-5 w-5 mr-2 text-pink-500" />
+                            Badges
+                          </h3>
+                          <div className="text-center py-4 text-white/70">
+                            <p>Complete challenges to earn badges!</p>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
                   </motion.div>
 
                   <motion.div
@@ -372,10 +402,18 @@ export default function ProfilePage() {
                           <Activity className="h-5 w-5 mr-2 text-pink-500" />
                           Activité Récente
                         </h3>
-                        <ActivityFeed activities={userData.recentActivity.slice(0, 3)} />
-                        <Button variant="ghost" className="w-full mt-4 border border-white/10 hover:bg-white/5">
-                          Voir toute l'activité
-                        </Button>
+                        {profileData?.recentActivity?.length > 0 ? (
+                          <>
+                            <ActivityFeed activities={profileData.recentActivity.slice(0, 3)} />
+                            <Button variant="ghost" className="w-full mt-4 border border-white/10 hover:bg-white/5">
+                              Voir toute l'activité
+                            </Button>
+                          </>
+                        ) : (
+                          <div className="text-center py-4 text-white/70">
+                            <p>No recent activity.</p>
+                          </div>
+                        )}
                       </div>
                     </Card>
                   </motion.div>
@@ -384,22 +422,68 @@ export default function ProfilePage() {
             </TabsContent>
 
             <TabsContent value="projects" className="mt-6">
-              <ProjectsSection projects={userData.projects} showAll={true} />
+              {profileData?.user_projects?.length > 0 ? (
+                <ProjectsSection projects={profileData.user_projects} showAll={true} />
+              ) : (
+                <Card className="backdrop-blur-xl bg-white/5 border border-white/10 overflow-hidden">
+                  <div className="p-6 text-center">
+                    <h3 className="text-xl font-bold mb-4">Projects</h3>
+                    <p className="text-white/70 mb-4">You haven't added any projects yet.</p>
+                    <Button
+                      className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+                      onClick={() => setShowOnboarding(true)}
+                    >
+                      Complete Your Profile
+                    </Button>
+                  </div>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="skills" className="mt-6">
-              <SkillsSection skills={userData.skills} />
+              {profileData?.skills?.length > 0 ? (
+                <SkillsSection skills={profileData.skills} />
+              ) : (
+                <Card className="backdrop-blur-xl bg-white/5 border border-white/10 overflow-hidden">
+                  <div className="p-6 text-center">
+                    <h3 className="text-xl font-bold mb-4">Skills</h3>
+                    <p className="text-white/70 mb-4">You haven't added any skills yet.</p>
+                    <Button
+                      className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+                      onClick={() => setShowOnboarding(true)}
+                    >
+                      Add Your Skills
+                    </Button>
+                  </div>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="achievements" className="mt-6">
-              <BadgesSection badges={userData.badges} showAll={true} />
+              {profileData?.badges?.length > 0 ? (
+                <BadgesSection badges={profileData.badges} showAll={true} />
+              ) : (
+                <Card className="backdrop-blur-xl bg-white/5 border border-white/10 overflow-hidden">
+                  <div className="p-6 text-center">
+                    <h3 className="text-xl font-bold mb-4">Achievements</h3>
+                    <p className="text-white/70 mb-4">Complete challenges to earn badges and achievements!</p>
+                  </div>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="activity" className="mt-6">
               <Card className="backdrop-blur-xl bg-white/5 border border-white/10 overflow-hidden">
                 <div className="p-6">
                   <h3 className="text-xl font-bold mb-4">Activité Complète</h3>
-                  <ActivityFeed activities={userData.recentActivity} />
+                  {profileData?.recentActivity?.length > 0 ? (
+                    <ActivityFeed activities={profileData.recentActivity} />
+                  ) : (
+                    <div className="text-center py-8 text-white/70">
+                      <p>No activity recorded yet.</p>
+                      <p className="mt-2">Start contributing to projects to see your activity here!</p>
+                    </div>
+                  )}
                 </div>
               </Card>
             </TabsContent>
@@ -464,6 +548,16 @@ export default function ProfilePage() {
           </Tabs>
         </div>
       </main>
+
+      {/* Profile Onboarding Dialog */}
+      {showOnboarding && (
+        <ProfileOnboarding
+          open={showOnboarding}
+          onOpenChange={setShowOnboarding}
+          onComplete={handleProfileComplete}
+          initialData={profileData}
+        />
+      )}
     </div>
   )
 }
