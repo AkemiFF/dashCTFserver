@@ -1,12 +1,8 @@
 "use client"
 
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { usePathname } from "next/navigation"
-import { Bell, Home, Search, MessageCircle, User, Menu, X, Trophy, Terminal, Shield, LogOut } from "lucide-react"
-import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { AnimatePresence, motion } from "framer-motion"
+import { Bell, Home, LogOut, Menu, MessageCircle, Search, Shield, Terminal, Trophy, User, X } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 export function SiteHeader({ unreadNotifications }: { unreadNotifications: number }) {
   const pathname = usePathname()
@@ -81,7 +81,7 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                 <Home className="h-4 w-4" />
                 <span className="text-sm">Home</span>
               </Link>
-              <Link
+              {/* <Link
                 href="/messages"
                 className={`px-3 py-2 rounded-full flex items-center gap-2 transition-colors relative ${pathname === "/messages" ? "bg-white/10 text-pink-400" : "text-white hover:bg-white/5"}`}
               >
@@ -89,7 +89,14 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                 <span className="text-sm">Messages</span>
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-pink-500 text-white text-xs">
                   3
-                </Badge>
+                </Badge> 
+              </Link>*/}
+              <Link
+                href="/learn/courses"
+                className={`px-3 py-2 rounded-full flex items-center gap-2 transition-colors ${pathname === "/leaderboard" ? "bg-white/10 text-pink-400" : "text-white hover:bg-white/5"}`}
+              >
+                <Trophy className="h-4 w-4" />
+                <span className="text-sm">Courses</span>
               </Link>
               <Link
                 href="/leaderboard"
@@ -132,34 +139,46 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                     </div>
                   </div>
                   <DropdownMenuLabel className="text-xs text-gray-400 font-normal">Navigation</DropdownMenuLabel>
-                  <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                    <User className="mr-2 h-4 w-4 text-pink-400" />
-                    <span>Profil</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                    <MessageCircle className="mr-2 h-4 w-4 text-pink-400" />
-                    <span>Messages</span>
-                    <Badge className="ml-auto bg-pink-500 text-white text-xs">3</Badge>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                    <Bell className="mr-2 h-4 w-4 text-pink-400" />
-                    <span>Notifications</span>
-                    <Badge className="ml-auto bg-pink-500 text-white text-xs">{unreadNotificationsCount}</Badge>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                    <Trophy className="mr-2 h-4 w-4 text-pink-400" />
-                    <span>Leaderboard</span>
-                  </DropdownMenuItem>
+                  <Link href="/profile">
+                    <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                      <User className="mr-2 h-4 w-4 text-pink-400" />
+                      <span>Profil</span>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/messages">
+                    <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                      <MessageCircle className="mr-2 h-4 w-4 text-pink-400" />
+                      <span>Messages</span>
+                      <Badge className="ml-auto bg-pink-500 text-white text-xs">3</Badge>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/notifications">
+                    <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                      <Bell className="mr-2 h-4 w-4 text-pink-400" />
+                      <span>Notifications</span>
+                      <Badge className="ml-auto bg-pink-500 text-white text-xs">{unreadNotificationsCount}</Badge>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/leaderboard">
+                    <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                      <Trophy className="mr-2 h-4 w-4 text-pink-400" />
+                      <span>Leaderboard</span>
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuLabel className="text-xs text-gray-400 font-normal">Activités</DropdownMenuLabel>
-                  <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                    <Terminal className="mr-2 h-4 w-4 text-pink-400" />
-                    <span>Mes Challenges</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                    <Shield className="mr-2 h-4 w-4 text-pink-400" />
-                    <span>Badges & Récompenses</span>
-                  </DropdownMenuItem>
+                  <Link href="/challenges">
+                    <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                      <Terminal className="mr-2 h-4 w-4 text-pink-400" />
+                      <span>Mes Challenges</span>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/badges">
+                    <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                      <Shield className="mr-2 h-4 w-4 text-pink-400" />
+                      <span>Badges & Récompenses</span>
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5 text-pink-500">
                     <LogOut className="mr-2 h-4 w-4" />
