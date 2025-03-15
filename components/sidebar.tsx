@@ -28,7 +28,7 @@ export function Sidebar({ userData }: { userData: UserBaseData }) {
     { icon: MessageCircle, label: "Messages", active: false, notifications: 3, link: "/messages" },
     { icon: Bell, label: "Notifications", active: false, notifications: 5, link: "/notifications" },
     { icon: Bookmark, label: "Enregistrés", active: false, link: "/enregistres" },
-    { icon: Users, label: "Amis", active: false, link: "/friends" },
+    { icon: Users, label: "Followers", active: false, link: "/followers" },
     { icon: Calendar, label: "Événements", active: false, link: "/events" },
   ]
 
@@ -47,11 +47,11 @@ export function Sidebar({ userData }: { userData: UserBaseData }) {
       >
         <div className="flex items-center space-x-4">
           <Avatar className="h-14 w-14 border-2 border-pink-500">
-            <AvatarImage src="/placeholder.svg?height=56&width=56" alt="@user" />
+            <AvatarImage src={userData.avatar} alt="@user" />
             <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500 text-white">JD</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold text-white">{userData.username}</h3>
+            <h3 className="font-semibold text-white">{userData.name}</h3>
             <p className="text-sm text-white/60">@{userData.username.toLowerCase()}</p>
           </div>
         </div>
