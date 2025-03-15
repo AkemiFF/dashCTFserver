@@ -5,8 +5,8 @@ import { BASE_URL } from "./host";
 export const authFetch = async (input: RequestInfo, init?: RequestInit) => {
     // 1. Ajoute le token d'accès dans les en-têtes
     const headers: HeadersInit = {
-        ...getAuthHeader(),
-        ...(init?.headers || {}), // Fusionne les en-têtes existants
+        ...await getAuthHeader(),
+        ...(init?.headers || {}),
     };
 
     // 2. Vérifie si l'utilisateur est authentifié
@@ -26,7 +26,7 @@ export const authFetch = async (input: RequestInfo, init?: RequestInit) => {
     }
 };
 
-const refreshToken = async (): Promise<string> => {
+export const refreshToken = async (): Promise<string> => {
     const refreshToken = getRefreshToken();
 
     const response = await fetch(`${BASE_URL}/api/auth/token/refresh/`, {

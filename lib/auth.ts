@@ -1,4 +1,5 @@
 // auth.ts
+import { refreshToken } from "./api";
 interface AuthData {
     access: string;
     refresh: string;
@@ -42,11 +43,29 @@ export const isAuthenticated = (): boolean => {
     return Date.now() < access_expires_at;
 };
 
-export const getAuthHeader = (): HeadersInit => {
-    const token = getAccessToken();
+export const getAuthHeader = async (): Promise<HeadersInit> => {
+    let token: string | null;
+    if (!isAuthenticated()) {
+        token = await refreshToken();
+    } else {
+        token = getAccessToken();
+    }
     return {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
+    };
+};
+
+
+export const getAuthHeaderFormData = async (): Promise<HeadersInit> => {
+    let token: string | null;
+    if (!isAuthenticated()) {
+        token = await refreshToken();
+    } else {
+        token = getAccessToken();
+    }
+    return {
+        'Authorization': `Bearer ${token}`,
     };
 };
 
