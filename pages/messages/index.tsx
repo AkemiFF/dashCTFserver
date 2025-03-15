@@ -29,7 +29,7 @@ export interface Contact {
   id: string
   name: string
   avatar: string
-  status: "online" | "offline" | "away" | "busy"
+  status: "online" | "offline" | "away" | "busy" | "typing"
   lastSeen?: Date
   isTyping?: boolean
   unreadCount?: number
