@@ -10,9 +10,36 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { authFetchAdmin } from "@/lib/api"
+import { getAuthHeaderFormData } from "@/lib/auth"
+import { BASE_URL } from "@/lib/host"
 import { AlertCircle, ArrowDown, ArrowUp, FileText, Image, Link, Plus, Trash2, Type, Video } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+
+type Course = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  level: string;
+  category: string;
+  duration: string;
+  instructor: string;
+  image: string;
+  students: number;
+  rating: string;
+  progress: number;
+};
+
+type ReferenceData = {
+  courses: Course[];
+  levels: string[];
+  categories: string[];
+  tags: string[];
+};
+
+
 
 type ContentItem =
   | { type: "text"; content: string }
@@ -23,7 +50,7 @@ type ContentItem =
 
 export default function AddModulePage() {
   const router = useRouter()
-  const [moduleData, setModuleData] = useState({
+  const [currentData, setCurrentData] = useState({
     courseId: "",
     title: "",
     duration: "",
@@ -33,12 +60,40 @@ export default function AddModulePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setModuleData((prev) => ({ ...prev, [name]: value }))
+    setCurrentData((prev) => ({ ...prev, [name]: value }))
   }
-
+  const [referenceData, setReferenceData] = useState<ReferenceData>({
+    courses: [],
+    levels: [],
+    categories: [],
+    tags: [],
+  });
   const handleSelectChange = (name: string, value: string) => {
-    setModuleData((prev) => ({ ...prev, [name]: value }))
+    setCurrentData((prev) => ({ ...prev, [name]: value }))
   }
+  useEffect(() => {
+    const fetchReferenceData = async () => {
+      try {
+        const response = await authFetchAdmin(`${BASE_URL}/api/learn/admin/reference-data/`)
+
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération des données de référence');
+        }
+
+        const data = await response.json();
+        setReferenceData({
+          courses: data.courses,
+          levels: data.levels,
+          categories: data.categories,
+          tags: data.tags,
+        });
+      } catch (error) {
+        setError((error as Error).message);
+      }
+    };
+
+    fetchReferenceData();
+  }, []);
 
   // Le problème est probablement lié à la façon dont nous gérons les types dans la fonction addContentItem.
   // Remplaçons la fonction addContentItem par cette version corrigée :
@@ -67,7 +122,7 @@ export default function AddModulePage() {
     }
 
     // Utilisons une fonction de mise à jour d'état plus explicite
-    setModuleData((prevState) => {
+    setCurrentData((prevState) => {
       console.log("Adding content item:", newItem)
       return {
         ...prevState,
@@ -77,58 +132,124 @@ export default function AddModulePage() {
   }
 
   const updateContentItem = (index: number, updatedItem: ContentItem) => {
-    setModuleData((prev) => ({
+    setCurrentData((prev) => ({
       ...prev,
       content: prev.content.map((item, i) => (i === index ? updatedItem : item)),
     }))
   }
 
   const moveContentItem = (index: number, direction: "up" | "down") => {
-    if ((direction === "up" && index === 0) || (direction === "down" && index === moduleData.content.length - 1)) {
+    if ((direction === "up" && index === 0) || (direction === "down" && index === currentData.content.length - 1)) {
       return
     }
     const newIndex = direction === "up" ? index - 1 : index + 1
-    const newContent = [...moduleData.content]
+    const newContent = [...currentData.content]
       ;[newContent[index], newContent[newIndex]] = [newContent[newIndex], newContent[index]]
-    setModuleData((prev) => ({ ...prev, content: newContent }))
+    setCurrentData((prev) => ({ ...prev, content: newContent }))
   }
 
   const removeContentItem = (index: number) => {
-    setModuleData((prev) => ({
+    setCurrentData((prev) => ({
       ...prev,
       content: prev.content.filter((_, i) => i !== index),
     }))
   }
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!moduleData.courseId || !moduleData.title || moduleData.content.length === 0) {
-      setError("Veuillez remplir tous les champs obligatoires et ajouter du contenu.")
-      return
+    if (!currentData.courseId || !currentData.title || currentData.content.length === 0) {
+      setError('Veuillez remplir tous les champs obligatoires et ajouter du contenu.');
+      return;
     }
 
-    // Here you would typically send this data to your backend
-    console.log("Module data submitted:", moduleData)
+    try {
+      const token = localStorage.getItem('token');
 
-    // Redirect to the modules page after submission
-    router.push("/admin/modules")
-  }
+      // Créer un objet pour la requête
+      const modulePayload: { course: string; title: string; duration: string; points: number } = {
+        course: currentData.courseId,
+        title: currentData.title,
+        duration: currentData.duration,
+        points: 10, // Valeur par défaut
+      };
+
+      // Créer le module
+      const moduleResponse = await fetch(`${BASE_URL}/api/learn/admin/modules/`, {
+        method: 'POST',
+        headers: {
+          ... await getAuthHeaderFormData()
+        },
+        body: JSON.stringify(modulePayload)
+      });
+
+      if (!moduleResponse.ok) {
+        const errorData = await moduleResponse.json();
+        throw new Error(errorData.error || 'Erreur lors de la création du module');
+      }
+
+      const moduleData = await moduleResponse.json();
+      const moduleId = moduleData.id;
+
+      // Ajouter les éléments de contenu
+      for (let i = 0; i < moduleData.content.length; i++) {
+        const item = moduleData.content[i];
+        const formData = new FormData();
+
+        formData.append('type', item.type);
+        formData.append('order', i.toString());
+
+        if (item.type === 'text') {
+          formData.append('content', item.content);
+        } else if (item.type === 'image') {
+          formData.append('image', item.file);
+          formData.append('image_position', item.position);
+        } else if (item.type === 'video') {
+          if (item.platform === 'upload' && item.file) {
+            formData.append('video_file', item.file);
+            formData.append('video_platform', 'upload');
+          } else {
+            formData.append('video_url', item.url);
+            formData.append('video_platform', item.platform);
+          }
+        } else if (item.type === 'file') {
+          formData.append('file', item.file);
+          formData.append('file_description', item.description);
+        } else if (item.type === 'link') {
+          formData.append('link_url', item.url);
+          formData.append('link_description', item.description);
+        }
+
+        const contentResponse = await fetch(`http://localhost:8000/api/admin/modules/${moduleId}/add_content/`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!contentResponse.ok) {
+          const errorData = await contentResponse.json();
+          throw new Error(errorData.error || `Erreur lors de l'ajout du contenu ${i + 1}`);
+        }
+      }
+
+      console.log('Module créé avec succès');
+
+      // Rediriger vers la liste des modules
+      router.push('/admin/modules');
+    } catch (error) {
+      setError((error as Error).message);
+    }
+  };
+
 
   // This would typically come from your API or state management
-  const mockCourses = [
-    { id: "1", title: "Introduction à la Cybersécurité" },
-    { id: "2", title: "Sécurité des Applications Web" },
-    { id: "3", title: "Cryptographie Avancée" },
-    { id: "4", title: "Ethical Hacking" },
-    { id: "5", title: "Forensic Numérique" },
-    { id: "6", title: "Sécurité des Réseaux" },
-  ]
+  const mockCourses = referenceData.courses
 
   // Ajoutons également un console.log dans le rendu pour déboguer
   // Ajoutez ceci juste avant le return dans le composant principal:
 
-  console.log("Current module data:", moduleData)
+  console.log("Current module data:", currentData)
 
   return (
     <Layout>
@@ -173,7 +294,7 @@ export default function AddModulePage() {
                   <Input
                     id="title"
                     name="title"
-                    value={moduleData.title}
+                    value={currentData.title}
                     onChange={handleInputChange}
                     className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
                     required
@@ -186,7 +307,7 @@ export default function AddModulePage() {
                 <Input
                   id="duration"
                   name="duration"
-                  value={moduleData.duration}
+                  value={currentData.duration}
                   onChange={handleInputChange}
                   placeholder="Ex: 1h 30min"
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
@@ -197,7 +318,7 @@ export default function AddModulePage() {
               <div className="space-y-4">
                 <Label>Contenu du module</Label>
                 <div className="space-y-4">
-                  {moduleData.content.map((item, index) => (
+                  {currentData.content.map((item, index) => (
                     <Card
                       key={index}
                       className="relative overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:shadow-md"
@@ -396,7 +517,7 @@ export default function AddModulePage() {
                           size="icon"
                           variant="ghost"
                           onClick={() => moveContentItem(index, "down")}
-                          disabled={index === moduleData.content.length - 1}
+                          disabled={index === currentData.content.length - 1}
                           className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
                         >
                           <ArrowDown className="h-4 w-4" />
