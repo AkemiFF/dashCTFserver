@@ -1,7 +1,9 @@
 export interface UserBaseData {
     id: string;
+    name: string;
     username: string;
     email: string;
+    avatar: string;
     role: string;
     is_staff: boolean;
     is_active: boolean;
