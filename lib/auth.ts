@@ -47,6 +47,15 @@ export const getRefreshToken = (): string | null => {
 };
 
 export const isAuthenticated = (): boolean => {
+    if (typeof window === "undefined") return false;
+
+    const auth = localStorage.getItem('auth');
+    if (!auth) return false;
+
+    const { access_expires_at } = JSON.parse(auth);
+    return Date.now() < access_expires_at;
+};
+export const isAuthenticated2 = (): boolean => {
     const auth = localStorage.getItem('auth');
     if (!auth) return false;
 
@@ -65,6 +74,15 @@ export const getAuthHeader = async (): Promise<HeadersInit> => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
     };
+};
+export const getClientToken = async (): Promise<string | null> => {
+    let token: string | null;
+    if (!isAuthenticated()) {
+        token = await refreshToken();
+    } else {
+        token = getAccessToken();
+    }
+    return token;
 };
 
 export const getAuthHeaderFormData = async (): Promise<HeadersInit> => {
@@ -136,3 +154,8 @@ export const getAdminAuthHeaderFormData = async (): Promise<HeadersInit> => {
         'Authorization': `Bearer ${token}`,
     };
 };
+
+export const logout = () => {
+    localStorage.removeItem('auth')
+    localStorage.removeItem('admin_auth')
+}

@@ -1,4 +1,4 @@
-import { getAdminAuthHeader, getAuthHeader, getRefreshToken, isAdminAuthenticated, isAuthenticated } from "./auth";
+import { getAdminAuthHeader, getAdminRefreshToken, getAuthHeader, getRefreshToken, isAdminAuthenticated, isAuthenticated } from "./auth";
 import { BASE_URL } from "./host";
 
 // api.ts
@@ -63,17 +63,19 @@ export const refreshToken = async (): Promise<string> => {
     }
 
     const data = await response.json();
+    const newAccessExpiresAt = Date.now() + 10 * 60 * 1000;
 
     // Mettre à jour uniquement le token d'accès dans localStorage
     const authData = JSON.parse(localStorage.getItem('auth') || '{}');
-    authData.access = data.access;  // Mettre à jour le token d'accès
+    authData.access = data.access;
+    authData.access_expires_a = newAccessExpiresAt;
     localStorage.setItem('auth', JSON.stringify(authData));
 
     return data.access;
 };
 
 export const refreshAdminToken = async (): Promise<string> => {
-    const refreshToken = getRefreshToken();
+    const refreshToken = getAdminRefreshToken();
 
     const response = await fetch(`${BASE_URL}/api/auth/token/refresh/admin/`, {
         method: 'POST',
@@ -86,10 +88,11 @@ export const refreshAdminToken = async (): Promise<string> => {
     }
 
     const data = await response.json();
+    const newAccessExpiresAt = Date.now() + 10 * 60 * 1000;
 
-    // Mettre à jour uniquement le token d'accès dans localStorage
     const authData = JSON.parse(localStorage.getItem('admin_auth') || '{}');
-    authData.access = data.access;  // Mettre à jour le token d'accès
+    authData.access = data.access;
+    authData.access_expires_a = newAccessExpiresAt;
     localStorage.setItem('admin_auth', JSON.stringify(authData));
 
     return data.access;
