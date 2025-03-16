@@ -1,6 +1,3 @@
-// @ts-check
-
-// You can remove the following 2 lines when integrating our example.
 import { loadCustomBuildParams } from './next-utils.config.js';
 const { esmExternals = false, tsconfigPath } =
   loadCustomBuildParams()
