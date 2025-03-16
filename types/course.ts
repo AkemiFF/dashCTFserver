@@ -18,6 +18,7 @@ export interface ImageContent extends BaseContentItem {
   type: "image"
   url: string
   position: ContentPosition
+
 }
 
 export interface VideoContent extends BaseContentItem {
@@ -49,9 +50,19 @@ export interface QuizQuestion {
   options?: string[]
   correctAnswer?: string | string[]
 }
+export interface Quiz {
+  id: string
+  questions: []
+  type: "multiple-choice" | "open-ended"
+  options?: string[]
+  correctAnswer?: string | string[]
+}
 
 export interface Module {
+  quiz_questions?: any[]
+  content_items?: any[]
   id: string
+  course_id: string
   courseId: string
   title: string
   duration: string
@@ -63,6 +74,7 @@ export interface Module {
 export interface Course {
   id: string
   title: string
+  slug: string
   description: string
   level: "debutant" | "intermediaire" | "avance"
   category: string
@@ -72,6 +84,7 @@ export interface Course {
   image: string
   tags: string[]
   modules: Module[]
+  quiz: Quiz
   students: number
   rating: number
   progress: number

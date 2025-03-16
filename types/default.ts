@@ -11,5 +11,7 @@ export const DefaultUserData: UserBaseData = {
     last_login: null,
     post_count: 0,
     followers_count: 0,
-    following_count: 0
+    following_count: 0,
+    name: "",
+    avatar: ""
 };
