@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
 import { authFetchAdmin } from "@/lib/api"
 import { getAdminAuthHeaderFormData } from "@/lib/auth"
-import { BASE_URL } from "@/lib/host"
+import { ADMIN_NAME, BASE_URL } from "@/lib/host"
 import { AlertCircle, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -32,6 +33,8 @@ export default function AddCoursePage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState("")
+  const { toast } = useToast()
+
   const [referenceData, setReferenceData] = useState({
     levels: [],
     categories: [],
@@ -133,9 +136,15 @@ export default function AddCoursePage() {
 
       const data = await response.json();
       console.log('Cours créé avec succès:', data);
-
+      toast({
+        title: "Success",
+        description: "Cours créé avec succès:. Redirection vers l'ajout de modules...",
+        variant: "default",
+      })
       // Rediriger vers la liste des cours
-      // router.push('/admin/courses');
+      setTimeout(() => {
+        router.push(`${ADMIN_NAME}/learn/add-module/`);
+      }, 1000);
     } catch (error) {
       setError((error as Error).message);
     }

@@ -11,8 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { authFetchAdmin } from "@/lib/api"
-import { getAuthHeaderFormData } from "@/lib/auth"
-import { BASE_URL } from "@/lib/host"
+import { getAdminAuthHeader, getAdminAuthHeaderFormData } from "@/lib/auth"
+import { ADMIN_NAME, BASE_URL } from "@/lib/host"
 import { AlertCircle, ArrowDown, ArrowUp, FileText, Image, Link, Plus, Trash2, Type, Video } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -74,7 +74,7 @@ export default function AddModulePage() {
   useEffect(() => {
     const fetchReferenceData = async () => {
       try {
-        const response = await authFetchAdmin(`${BASE_URL}/api/learn/admin/reference-data/`)
+        const response = await authFetchAdmin(`${BASE_URL}/api/learn/admin/reference-data/`);
 
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des données de référence');
@@ -177,7 +177,7 @@ export default function AddModulePage() {
       const moduleResponse = await fetch(`${BASE_URL}/api/learn/admin/modules/`, {
         method: 'POST',
         headers: {
-          ... await getAuthHeaderFormData()
+          ... await getAdminAuthHeader()
         },
         body: JSON.stringify(modulePayload)
       });
@@ -189,10 +189,10 @@ export default function AddModulePage() {
 
       const moduleData = await moduleResponse.json();
       const moduleId = moduleData.id;
-
+      console.log(moduleData)
       // Ajouter les éléments de contenu
-      for (let i = 0; i < moduleData.content.length; i++) {
-        const item = moduleData.content[i];
+      for (let i = 0; i < currentData.content.length; i++) {
+        const item = currentData.content[i];
         const formData = new FormData();
 
         formData.append('type', item.type);
@@ -201,7 +201,9 @@ export default function AddModulePage() {
         if (item.type === 'text') {
           formData.append('content', item.content);
         } else if (item.type === 'image') {
-          formData.append('image', item.file);
+          if (item.file) {
+            formData.append('image', item.file);
+          }
           formData.append('image_position', item.position);
         } else if (item.type === 'video') {
           if (item.platform === 'upload' && item.file) {
@@ -212,17 +214,19 @@ export default function AddModulePage() {
             formData.append('video_platform', item.platform);
           }
         } else if (item.type === 'file') {
-          formData.append('file', item.file);
+          if (item.file) {
+            formData.append('file', item.file);
+          }
           formData.append('file_description', item.description);
         } else if (item.type === 'link') {
           formData.append('link_url', item.url);
           formData.append('link_description', item.description);
         }
 
-        const contentResponse = await fetch(`http://localhost:8000/api/admin/modules/${moduleId}/add_content/`, {
+        const contentResponse = await fetch(`${BASE_URL}/api/learn/admin/modules/${moduleId}/add_content/`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`
+            ...await getAdminAuthHeaderFormData()
           },
           body: formData
         });
@@ -236,7 +240,7 @@ export default function AddModulePage() {
       console.log('Module créé avec succès');
 
       // Rediriger vers la liste des modules
-      router.push('/admin/modules');
+      router.push(`${ADMIN_NAME}/learn`);
     } catch (error) {
       setError((error as Error).message);
     }

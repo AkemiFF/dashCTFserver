@@ -3,41 +3,68 @@ import Layout from "@/components/admin/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { authFetchAdmin } from "@/lib/api"
+import { BASE_URL } from "@/lib/host"
 import type { Course } from "@/types/course"
 import { BookOpen, PlusCircle } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
-const courses: Course[] = [
+const coursesBase: Course[] = [
   {
     id: "1",
-    title: "Introduction à la Cybersécurité",
-    description: "Un cours complet pour débutants en cybersécurité",
-    level: "Débutant",
-    duration: "4 semaines",
-    modules: [
-      { id: "m1", title: "Les bases de la sécurité informatique", content: [] },
-      { id: "m2", title: "Comprendre les menaces courantes", content: [] },
-      // Add more modules
-    ],
-    quiz: { id: "q1", questions: [] }, // Quiz details would be populated here
+    title: "",
+    slug: "",
+    description: "",
+    level: "debutant",
+    category: "",
+    duration: "",
+    instructor: "",
+    image: "",
+    students: 0,
+    prerequisites: "",
+    tags: [],
+    modules: [],
+    rating: 0,
+    progress: 0,
+    quiz: { id: "q1", questions: [], type: "multiple-choice" }
   },
-  {
-    id: "2",
-    title: "Sécurité des Applications Web",
-    description: "Apprenez à sécuriser vos applications web",
-    level: "Intermédiaire",
-    duration: "6 semaines",
-    modules: [
-      { id: "m1", title: "Vulnérabilités OWASP Top 10", content: [] },
-      { id: "m2", title: "Sécurisation des API", content: [] },
-      // Add more modules
-    ],
-    quiz: { id: "q2", questions: [] },
-  },
+  // {
+  //   id: "2",
+  //   title: "Sécurité des Applications Web",
+  //   description: "Apprenez à sécuriser vos applications web",
+  //   level: "Intermédiaire",
+  //   duration: "6 semaines",
+  //   modules: [
+  //     { id: "m1", title: "Vulnérabilités OWASP Top 10", content: [] },
+  //     { id: "m2", title: "Sécurisation des API", content: [] },
+  //     // Add more modules
+  //   ],
+  //   quiz: { id: "q2", questions: [] },
+  // },
   // Add more courses as needed
 ]
 
 export default function LearnPage() {
+  const [courses, setCourses] = useState<Course[]>(coursesBase)
+  useEffect(() => {
+    const fetchReferenceData = async () => {
+      try {
+        const response = await authFetchAdmin(`${BASE_URL}/api/learn/courses/`);
+
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération des données de référence');
+        }
+
+        const data = await response.json();
+        setCourses(data.results);
+      } catch (error) {
+        console.log((error as Error).message);
+      }
+    };
+
+    fetchReferenceData();
+  }, []);
   return (
     <Layout>
       <div className="space-y-6 max-w-[1200px] mx-auto">
