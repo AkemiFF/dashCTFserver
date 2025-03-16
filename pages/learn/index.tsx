@@ -6,54 +6,103 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDebounce } from "@/hooks/use-debounce"
-import { CourseService } from "@/services/course-service"
 import type { Course } from "@/types/course"
 import { motion } from "framer-motion"
 import { BookOpen, Clock, Plus, Search, TrendingUp } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useMemo, useState } from "react"
+// Ajouter l'import pour ProtectedRoute
+import ProtectedRoute from "@/components/protected-route"
+// Ajouter l'import pour useApi
+import { useApi } from "@/hooks/use-api"
 
+// Remplacer les états et useEffect par useApi
 export default function LearnPage() {
     const router = useRouter()
     const [searchTerm, setSearchTerm] = useState("")
     const [activeTab, setActiveTab] = useState("all")
-    const [courses, setCourses] = useState<Course[]>([])
-    const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
-
     const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
-    useEffect(() => {
-        // Charger les cours
-        const allCourses = CourseService.getAllCourses()
-        setCourses(allCourses)
-        setFilteredCourses(allCourses)
-    }, [])
+    // Utiliser useApi pour charger les cours
+    const { results: courses = [], isLoading, isError } = useApi<Course[]>("/learn/courses")
 
-    useEffect(() => {
-        let filtered = [...courses]
 
-        // Appliquer le filtre de recherche
+    // Ajouter après la déclaration de useApi pour les cours
+    // console.log("API Response:", { courses, isLoading, isError })
+
+    // Utiliser useApi pour les cours filtrés en fonction de l'onglet actif
+    const { results: filteredCourses = [] } = useApi<Course[]>(
+        activeTab === "popular" && !debouncedSearchTerm
+            ? "/learn/courses/popular"
+            : activeTab === "newest" && !debouncedSearchTerm
+                ? "/learn/courses/recent"
+                : activeTab === "enrolled" && !debouncedSearchTerm
+                    ? "/learn/user/courses"
+                    : null,
+        {
+            fallbackData: courses,
+        },
+    )
+
+    // Utiliser useApi pour la recherche
+    const { results: searchResults = [] } = useApi<Course[]>(
+        debouncedSearchTerm ? `/courses/search?q=${encodeURIComponent(debouncedSearchTerm)}` : null,
+        {
+            fallbackData: [],
+        },
+    )
+
+    // Déterminer les cours à afficher
+    const coursesToDisplay = debouncedSearchTerm
+        ? searchResults
+        : activeTab === "all" && !debouncedSearchTerm
+            ? courses
+            : filteredCourses
+
+    // Filtrer les cours côté client si nécessaire
+    const displayedCourses = useMemo(() => {
         if (debouncedSearchTerm) {
-            filtered = filtered.filter(
-                (course) =>
-                    course.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                    course.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                    course.tags.some((tag) => tag.toLowerCase().includes(debouncedSearchTerm.toLowerCase())),
+            return searchResults
+        }
+
+        if (activeTab === "all") {
+            return courses
+        }
+
+        if (activeTab === "popular" && debouncedSearchTerm) {
+            return courses
+                .filter(
+                    (course: { title: string; description: string; tags: any[] }) =>
+                        course.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        course.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        course.tags.some((tag: string) => tag.toLowerCase().includes(debouncedSearchTerm.toLowerCase())),
+                )
+                .sort((a: { students: number }, b: { students: number }) => b.students - a.students)
+        }
+
+        if (activeTab === "newest" && debouncedSearchTerm) {
+            return courses
+                .filter(
+                    (course: { title: string; description: string; tags: any[] }) =>
+                        course.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        course.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        course.tags.some((tag: string) => tag.toLowerCase().includes(debouncedSearchTerm.toLowerCase())),
+                )
+                .sort((a: { id: any }, b: { id: string }) => b.id.localeCompare(a.id))
+        }
+
+        if (activeTab === "enrolled" && debouncedSearchTerm) {
+            return courses.filter(
+                (course: { progress: number; title: string; description: string; tags: any[] }) =>
+                    course.progress > 0 &&
+                    (course.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        course.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        course.tags.some((tag: string) => tag.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))),
             )
         }
 
-        // Appliquer le filtre par onglet
-        if (activeTab === "popular") {
-            filtered = filtered.sort((a, b) => b.students - a.students)
-        } else if (activeTab === "newest") {
-            // Dans une vraie application, vous trieriez par date
-            filtered = filtered.sort((a, b) => b.id.localeCompare(a.id))
-        } else if (activeTab === "enrolled") {
-            filtered = filtered.filter((course) => course.progress > 0)
-        }
-
-        setFilteredCourses(filtered)
-    }, [debouncedSearchTerm, activeTab, courses])
+        return filteredCourses
+    }, [activeTab, courses, debouncedSearchTerm, filteredCourses, searchResults])
 
     const handleCourseClick = (course: Course) => {
         router.push(`/learn/courses/${course.id}`)
@@ -70,145 +119,265 @@ export default function LearnPage() {
     }
 
     return (
-        <div className="min-h-screen bg-navy-950 text-white">
-            <div className="container mx-auto px-4 py-8">
-                <div className="space-y-8">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">
-                                Formations
-                            </h1>
-                            <p className="text-white/70 mt-1">Développez vos compétences avec nos formations complètes</p>
+        <ProtectedRoute>
+            <div className="min-h-screen mt-16 bg-navy-950 text-white">
+                <div className="container mx-auto px-4 py-8">
+                    <div className="space-y-8">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">
+                                    Formations
+                                </h1>
+                                <p className="text-white/70 mt-1">Développez vos compétences avec nos formations complètes</p>
+                            </div>
+
+                            <div className="relative w-full md:w-64">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-4 w-4" />
+                                <Input
+                                    placeholder="Rechercher des formations..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/50"
+                                />
+                            </div>
                         </div>
 
-                        <div className="relative w-full md:w-64">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-4 w-4" />
-                            <Input
-                                placeholder="Rechercher des formations..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/50"
-                            />
-                        </div>
+                        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+                            <TabsList className="bg-white/5 border border-white/10">
+                                <TabsTrigger value="all" className="results-[state=active]:bg-white/10">
+                                    <BookOpen className="h-4 w-4 mr-2" />
+                                    Toutes les formations
+                                </TabsTrigger>
+                                <TabsTrigger value="popular" className="results-[state=active]:bg-white/10">
+                                    <TrendingUp className="h-4 w-4 mr-2" />
+                                    Populaires
+                                </TabsTrigger>
+                                <TabsTrigger value="newest" className="results-[state=active]:bg-white/10">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Récentes
+                                </TabsTrigger>
+                                <TabsTrigger value="enrolled" className="results-[state=active]:bg-white/10">
+                                    <Clock className="h-4 w-4 mr-2" />
+                                    Mes formations
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="all" className="mt-6">
+                                {/* Afficher un indicateur de chargement */}
+                                {isLoading && (
+                                    <div className="flex justify-center py-12">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+                                    </div>
+                                )}
+
+                                {/* Afficher un message d'erreur */}
+                                {isError && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Erreur de chargement</h3>
+                                        <p className="text-white/50 mt-2">
+                                            Impossible de charger les cours. Veuillez vérifier la connexion à l'API.
+                                        </p>
+                                        <div className="mt-2 p-4 bg-white/5 rounded text-left overflow-auto max-h-40 text-xs">
+                                            <pre>
+                                                {JSON.stringify({ url: `${process.env.NEXT_PUBLIC_API_URL}/courses`, error: isError }, null, 2)}
+                                            </pre>
+                                        </div>
+                                        <Button
+                                            className="mt-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Réessayer
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Afficher les cours */}
+                                {!isLoading && !isError && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {displayedCourses.map((course: Course, index: number) => (
+                                            <CourseCard
+                                                key={course.id}
+                                                course={course}
+                                                index={index}
+                                                onClick={() => handleCourseClick(course)}
+                                                translateLevel={translateLevel}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Afficher un message si aucun cours n'est trouvé */}
+                                {!isLoading && !isError && displayedCourses.length === 0 && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Aucune formation trouvée</h3>
+                                        <p className="text-white/50 mt-2">Essayez d'ajuster votre recherche ou vos filtres</p>
+                                    </div>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="popular" className="mt-6">
+                                {/* Afficher un indicateur de chargement */}
+                                {isLoading && (
+                                    <div className="flex justify-center py-12">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+                                    </div>
+                                )}
+
+                                {/* Afficher un message d'erreur */}
+                                {isError && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Erreur de chargement</h3>
+                                        <p className="text-white/50 mt-2">
+                                            Impossible de charger les cours. Veuillez vérifier la connexion à l'API.
+                                        </p>
+                                        <div className="mt-2 p-4 bg-white/5 rounded text-left overflow-auto max-h-40 text-xs">
+                                            <pre>
+                                                {JSON.stringify({ url: `${process.env.NEXT_PUBLIC_API_URL}/courses`, error: isError }, null, 2)}
+                                            </pre>
+                                        </div>
+                                        <Button
+                                            className="mt-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Réessayer
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Afficher les cours */}
+                                {!isLoading && !isError && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {displayedCourses.map((course: Course, index: number) => (
+                                            <CourseCard
+                                                key={course.id}
+                                                course={course}
+                                                index={index}
+                                                onClick={() => handleCourseClick(course)}
+                                                translateLevel={translateLevel}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Afficher un message si aucun cours n'est trouvé */}
+                                {!isLoading && !isError && displayedCourses.length === 0 && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Aucune formation trouvée</h3>
+                                        <p className="text-white/50 mt-2">Essayez d'ajuster votre recherche ou vos filtres</p>
+                                    </div>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="newest" className="mt-6">
+                                {/* Afficher un indicateur de chargement */}
+                                {isLoading && (
+                                    <div className="flex justify-center py-12">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+                                    </div>
+                                )}
+
+                                {/* Afficher un message d'erreur */}
+                                {isError && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Erreur de chargement</h3>
+                                        <p className="text-white/50 mt-2">
+                                            Impossible de charger les cours. Veuillez vérifier la connexion à l'API.
+                                        </p>
+                                        <div className="mt-2 p-4 bg-white/5 rounded text-left overflow-auto max-h-40 text-xs">
+                                            <pre>
+                                                {JSON.stringify({ url: `${process.env.NEXT_PUBLIC_API_URL}/courses`, error: isError }, null, 2)}
+                                            </pre>
+                                        </div>
+                                        <Button
+                                            className="mt-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Réessayer
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Afficher les cours */}
+                                {!isLoading && !isError && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {displayedCourses.map((course: Course, index: number) => (
+                                            <CourseCard
+                                                key={course.id}
+                                                course={course}
+                                                index={index}
+                                                onClick={() => handleCourseClick(course)}
+                                                translateLevel={translateLevel}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Afficher un message si aucun cours n'est trouvé */}
+                                {!isLoading && !isError && displayedCourses.length === 0 && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Aucune formation trouvée</h3>
+                                        <p className="text-white/50 mt-2">Essayez d'ajuster votre recherche ou vos filtres</p>
+                                    </div>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="enrolled" className="mt-6">
+                                {/* Afficher un indicateur de chargement */}
+                                {isLoading && (
+                                    <div className="flex justify-center py-12">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+                                    </div>
+                                )}
+
+                                {/* Afficher un message d'erreur */}
+                                {isError && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Erreur de chargement</h3>
+                                        <p className="text-white/50 mt-2">
+                                            Impossible de charger les cours. Veuillez vérifier la connexion à l'API.
+                                        </p>
+                                        <div className="mt-2 p-4 bg-white/5 rounded text-left overflow-auto max-h-40 text-xs">
+                                            <pre>
+                                                {JSON.stringify({ url: `${process.env.NEXT_PUBLIC_API_URL}/courses`, error: isError }, null, 2)}
+                                            </pre>
+                                        </div>
+                                        <Button
+                                            className="mt-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Réessayer
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Afficher les cours */}
+                                {!isLoading && !isError && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {displayedCourses.map((course: Course, index: number) => (
+                                            <CourseCard
+                                                key={course.id}
+                                                course={course}
+                                                index={index}
+                                                onClick={() => handleCourseClick(course)}
+                                                translateLevel={translateLevel}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Afficher un message si aucun cours n'est trouvé */}
+                                {!isLoading && !isError && displayedCourses.length === 0 && (
+                                    <div className="text-center py-12">
+                                        <h3 className="text-xl font-medium text-white/70">Aucune formation trouvée</h3>
+                                        <p className="text-white/50 mt-2">Essayez d'ajuster votre recherche ou vos filtres</p>
+                                    </div>
+                                )}
+                            </TabsContent>
+                        </Tabs>
                     </div>
-
-                    <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="bg-white/5 border border-white/10">
-                            <TabsTrigger value="all" className="data-[state=active]:bg-white/10">
-                                <BookOpen className="h-4 w-4 mr-2" />
-                                Toutes les formations
-                            </TabsTrigger>
-                            <TabsTrigger value="popular" className="data-[state=active]:bg-white/10">
-                                <TrendingUp className="h-4 w-4 mr-2" />
-                                Populaires
-                            </TabsTrigger>
-                            <TabsTrigger value="newest" className="data-[state=active]:bg-white/10">
-                                <Plus className="h-4 w-4 mr-2" />
-                                Récentes
-                            </TabsTrigger>
-                            <TabsTrigger value="enrolled" className="data-[state=active]:bg-white/10">
-                                <Clock className="h-4 w-4 mr-2" />
-                                Mes formations
-                            </TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="all" className="mt-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredCourses.map((course, index) => (
-                                    <CourseCard
-                                        key={course.id}
-                                        course={course}
-                                        index={index}
-                                        onClick={() => handleCourseClick(course)}
-                                        translateLevel={translateLevel}
-                                    />
-                                ))}
-                            </div>
-
-                            {filteredCourses.length === 0 && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-medium text-white/70">Aucune formation trouvée</h3>
-                                    <p className="text-white/50 mt-2">Essayez d'ajuster votre recherche ou vos filtres</p>
-                                </div>
-                            )}
-                        </TabsContent>
-
-                        <TabsContent value="popular" className="mt-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredCourses.map((course, index) => (
-                                    <CourseCard
-                                        key={course.id}
-                                        course={course}
-                                        index={index}
-                                        onClick={() => handleCourseClick(course)}
-                                        translateLevel={translateLevel}
-                                    />
-                                ))}
-                            </div>
-
-                            {filteredCourses.length === 0 && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-medium text-white/70">Aucune formation populaire trouvée</h3>
-                                    <p className="text-white/50 mt-2">
-                                        Revenez plus tard pour découvrir de nouvelles formations populaires
-                                    </p>
-                                </div>
-                            )}
-                        </TabsContent>
-
-                        <TabsContent value="newest" className="mt-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredCourses.map((course, index) => (
-                                    <CourseCard
-                                        key={course.id}
-                                        course={course}
-                                        index={index}
-                                        onClick={() => handleCourseClick(course)}
-                                        translateLevel={translateLevel}
-                                    />
-                                ))}
-                            </div>
-
-                            {filteredCourses.length === 0 && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-medium text-white/70">Aucune nouvelle formation trouvée</h3>
-                                    <p className="text-white/50 mt-2">Revenez plus tard pour découvrir de nouvelles formations</p>
-                                </div>
-                            )}
-                        </TabsContent>
-
-                        <TabsContent value="enrolled" className="mt-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredCourses.map((course, index) => (
-                                    <CourseCard
-                                        key={course.id}
-                                        course={course}
-                                        index={index}
-                                        onClick={() => handleCourseClick(course)}
-                                        translateLevel={translateLevel}
-                                    />
-                                ))}
-                            </div>
-
-                            {filteredCourses.length === 0 && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-medium text-white/70">Vous n'êtes inscrit à aucune formation</h3>
-                                    <p className="text-white/50 mt-2">
-                                        Parcourez nos formations et commencez à apprendre dès aujourd'hui
-                                    </p>
-                                    <Button
-                                        className="mt-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-                                        onClick={() => setActiveTab("all")}
-                                    >
-                                        Parcourir les formations
-                                    </Button>
-                                </div>
-                            )}
-                        </TabsContent>
-                    </Tabs>
                 </div>
             </div>
-        </div>
+        </ProtectedRoute>
     )
 }
 
@@ -256,12 +425,12 @@ function CourseCard({
                 <CardContent className="p-5 flex-1 flex flex-col">
                     <div className="flex-1">
                         <div className="flex flex-wrap gap-2 mb-2">
-                            {course.tags.slice(0, 2).map((tag) => (
+                            {course.tags?.slice(0, 2).map((tag) => (
                                 <Badge key={tag} variant="outline" className="bg-white/5 text-white/70 border-white/10">
                                     {tag}
                                 </Badge>
                             ))}
-                            {course.tags.length > 2 && (
+                            {course.tags?.length > 2 && (
                                 <Badge variant="outline" className="bg-white/5 text-white/70 border-white/10">
                                     +{course.tags.length - 2}
                                 </Badge>
