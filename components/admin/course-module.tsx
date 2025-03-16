@@ -1,5 +1,5 @@
-import type { Module } from "@/types/course"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { Module } from "@/types/course"
 import Image from "next/image"
 
 interface CourseModuleProps {
@@ -23,9 +23,9 @@ export function CourseModule({ module }: CourseModuleProps) {
               )
             case "image":
               return (
-                <div key={index} className={`mb-4 flex justify-${item.position || "center"}`}>
+                <div key={index} className={`mb-4 flex justify-${item.type || "center"}`}>
                   <Image
-                    src={item.content || "/placeholder.svg"}
+                    src={item.url || "/placeholder.svg"}
                     alt="Module image"
                     width={400}
                     height={300}
@@ -35,9 +35,9 @@ export function CourseModule({ module }: CourseModuleProps) {
               )
             case "video":
               return (
-                <div key={index} className={`mb-4 flex justify-${item.position || "center"}`}>
+                <div key={index} className={`mb-4 flex justify-${item.type || "center"}`}>
                   <video controls width="400" className="rounded-lg">
-                    <source src={item.content} type="video/mp4" />
+                    <source src={item.url} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 </div>

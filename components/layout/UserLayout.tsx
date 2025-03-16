@@ -9,10 +9,12 @@ export default function UsersLayout({ children }: { children: React.ReactNode })
         <title>Hackitech.co</title>
       </Head>
       <div className="users-layout">
-        <SiteHeader unreadNotifications={3} />
-
+        {typeof window !== 'undefined' && !window.location.pathname.match(/\/learn\/courses\/\d+\/modules\/\d+/) && <SiteHeader unreadNotifications={3} />}
         <main>{children}</main>
-        <Footer />
-      </div></>
+        {typeof window !== 'undefined' && !window.location.pathname.match(/\/learn\/courses\/\d+\/modules\/\d+/) &&
+          <Footer />}
+
+      </div>
+    </>
   );
 }

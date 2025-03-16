@@ -29,7 +29,7 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50"
+      className="fixed top-0 left-0 right-0 z-20"
     >
       <div className="relative">
         {/* Glowing border */}
@@ -92,11 +92,11 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                 </Badge> 
               </Link>*/}
               <Link
-                href="/learn/courses"
+                href="/learn"
                 className={`px-3 py-2 rounded-full flex items-center gap-2 transition-colors ${pathname === "/leaderboard" ? "bg-white/10 text-pink-400" : "text-white hover:bg-white/5"}`}
               >
                 <Trophy className="h-4 w-4" />
-                <span className="text-sm">Courses</span>
+                <span className="text-sm">Learn</span>
               </Link>
               <Link
                 href="/leaderboard"
