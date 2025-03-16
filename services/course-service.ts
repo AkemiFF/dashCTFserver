@@ -5,8 +5,7 @@ const mockCourses: Course[] = [
     {
         id: "1",
         title: "Introduction à la Cybersécurité",
-        description:
-            "Découvrez les fondamentaux de la cybersécurité et apprenez à protéger vos systèmes contre les menaces courantes.",
+        description: "Découvrez les fondamentaux de la cybersécurité et apprenez à protéger vos systèmes contre les menaces courantes.",
         level: "debutant",
         category: "securite",
         duration: "8 semaines",
@@ -24,8 +23,7 @@ const mockCourses: Course[] = [
                     {
                         id: "c1",
                         type: "text",
-                        content:
-                            "<h2>Introduction à la cybersécurité</h2><p>La cybersécurité est l'ensemble des moyens techniques, organisationnels, juridiques et humains nécessaires à la mise en place de moyens visant à empêcher l'utilisation non autorisée, le mauvais usage, la modification ou le détournement du système d'information.</p><p>Dans ce module, nous allons explorer les concepts fondamentaux qui vous permettront de comprendre les enjeux et les mécanismes de base de la sécurité informatique.</p>",
+                        content: "<h2>Introduction à la cybersécurité</h2><p>La cybersécurité est l'ensemble des moyens techniques, organisationnels, juridiques et humains nécessaires à la mise en place de moyens visant à empêcher l'utilisation non autorisée, le mauvais usage, la modification ou le détournement du système d'information.</p><p>Dans ce module, nous allons explorer les concepts fondamentaux qui vous permettront de comprendre les enjeux et les mécanismes de base de la sécurité informatique.</p>",
                     },
                     {
                         id: "c2",
@@ -36,8 +34,7 @@ const mockCourses: Course[] = [
                     {
                         id: "c3",
                         type: "text",
-                        content:
-                            "<h3>Les trois piliers de la sécurité informatique</h3><ul><li><strong>Confidentialité</strong> : Garantir que l'information n'est accessible qu'aux personnes autorisées</li><li><strong>Intégrité</strong> : Garantir que l'information n'est pas altérée de façon non autorisée</li><li><strong>Disponibilité</strong> : Garantir que l'information est accessible quand elle est nécessaire</li></ul>",
+                        content: "<h3>Les trois piliers de la sécurité informatique</h3><ul><li><strong>Confidentialité</strong> : Garantir que l'information n'est accessible qu'aux personnes autorisées</li><li><strong>Intégrité</strong> : Garantir que l'information n'est pas altérée de façon non autorisée</li><li><strong>Disponibilité</strong> : Garantir que l'information est accessible quand elle est nécessaire</li></ul>",
                     },
                 ],
                 quiz: [
@@ -55,12 +52,14 @@ const mockCourses: Course[] = [
                     },
                     {
                         id: "q2",
-                        question:
-                            "Expliquez avec vos propres mots pourquoi la cybersécurité est importante pour les entreprises aujourd'hui.",
+                        question: "Expliquez avec vos propres mots pourquoi la cybersécurité est importante pour les entreprises aujourd'hui.",
                         type: "open-ended",
                     },
                 ],
                 completed: true,
+                quiz_questions: [],
+                content_items: [],
+                course_id: ""
             },
             {
                 id: "m2",
@@ -71,8 +70,7 @@ const mockCourses: Course[] = [
                     {
                         id: "c1",
                         type: "text",
-                        content:
-                            "<h2>Comprendre les menaces informatiques</h2><p>Les menaces informatiques évoluent constamment. Dans cette section, nous allons explorer les types d'attaques les plus courants et comprendre comment ils fonctionnent.</p>",
+                        content: "<h2>Comprendre les menaces informatiques</h2><p>Les menaces informatiques évoluent constamment. Dans cette section, nous allons explorer les types d'attaques les plus courants et comprendre comment ils fonctionnent.</p>",
                     },
                     {
                         id: "c2",
@@ -83,80 +81,38 @@ const mockCourses: Course[] = [
                     {
                         id: "c3",
                         type: "text",
-                        content:
-                            "<h3>Types d'attaques courants</h3><ul><li><strong>Phishing</strong> : Tentatives de vol d'informations sensibles en se faisant passer pour une entité de confiance</li><li><strong>Malware</strong> : Logiciels malveillants conçus pour endommager ou infiltrer un système</li><li><strong>Attaques par déni de service (DDoS)</strong> : Tentatives de rendre un service indisponible en le submergeant de trafic</li><li><strong>Attaques par force brute</strong> : Tentatives de deviner des mots de passe par essais successifs</li></ul>",
+                        content: "<h3>Types d'attaques courants</h3><ul><li><strong>Phishing</strong> : Tentatives de vol d'informations sensibles en se faisant passer pour une entité de confiance</li><li><strong>Malware</strong> : Logiciels malveillants conçus pour endommager ou infiltrer un système</li><li><strong>Attaques par déni de service (DDoS)</strong> : Tentatives de rendre un service indisponible en le submergeant de trafic</li><li><strong>Attaques par force brute</strong> : Tentatives de deviner des mots de passe par essais successifs</li></ul>",
                     },
                 ],
                 quiz: [
                     {
                         id: "q1",
-                        question:
-                            "Quelle technique d'attaque consiste à envoyer des emails frauduleux imitant une entité légitime ?",
+                        question: "Quelle technique d'attaque consiste à envoyer des emails frauduleux imitant une entité légitime ?",
                         type: "multiple-choice",
                         options: ["Phishing", "Malware", "DDoS", "Man-in-the-middle"],
                         correctAnswer: "Phishing",
                     },
                     {
                         id: "q2",
-                        question:
-                            "Décrivez une expérience personnelle où vous avez identifié une tentative de phishing et comment vous l'avez reconnue.",
+                        question: "Décrivez une expérience personnelle où vous avez identifié une tentative de phishing et comment vous l'avez reconnue.",
                         type: "open-ended",
                     },
                 ],
                 completed: false,
+                quiz_questions: [],
+                content_items: [],
+                course_id: ""
             },
         ],
         students: 12500,
         rating: 4.8,
         progress: 35,
+        slug: "",
+        quiz: { id: "q1", questions: [], type: "multiple-choice" }
     },
-    {
-        id: "2",
-        title: "Sécurité des Applications Web",
-        description:
-            "Apprenez à sécuriser vos applications web contre les vulnérabilités courantes et à implémenter des pratiques de développement sécurisé.",
-        level: "intermediaire",
-        category: "developpement",
-        duration: "10 semaines",
-        prerequisites: "Connaissances en développement web (HTML, CSS, JavaScript)",
-        instructor: "Thomas Dubois",
-        image: "/placeholder.svg?height=400&width=600",
-        tags: ["Sécurité Web", "OWASP", "Développement sécurisé"],
-        modules: [
-            {
-                id: "m1",
-                courseId: "2",
-                title: "Comprendre l'OWASP Top 10",
-                duration: "4h",
-                content: [
-                    {
-                        id: "c1",
-                        type: "text",
-                        content:
-                            "<h2>Introduction à l'OWASP Top 10</h2><p>L'OWASP (Open Web Application Security Project) Top 10 est une liste des dix risques de sécurité les plus critiques pour les applications web. Cette liste est mise à jour régulièrement pour refléter l'évolution des menaces.</p>",
-                    },
-                ],
-                quiz: [
-                    {
-                        id: "q1",
-                        question: "Que signifie OWASP ?",
-                        type: "multiple-choice",
-                        options: [
-                            "Open Web Application Security Project",
-                            "Online Web Attack Security Protocol",
-                            "Open Wireless Access Security Platform",
-                            "Organized Web Application Security Principles",
-                        ],
-                        correctAnswer: "Open Web Application Security Project",
-                    },
-                ],
-                completed: false,
-            },
-        ],
-        students: 8300,
-        rating: 4.9,
-        progress: 0,
-    },
+
+
+
 ]
 
 // Service pour gérer les cours

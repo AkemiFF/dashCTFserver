@@ -10,45 +10,39 @@ export async function getCourseById(id: string): Promise<Course | null> {
     id,
     title: "Introduction à la Cybersécurité",
     description: "Un cours complet pour débutants en cybersécurité",
-    level: "Débutant",
+    level: "debutant",
     duration: "4 semaines",
     modules: [
       {
         id: "m1",
         title: "Les bases de la sécurité informatique",
         content: [
-          { type: "text", content: "La cybersécurité est un domaine crucial dans notre ère numérique..." },
-          { type: "image", content: "/images/cybersecurity-basics.jpg", position: "center" },
+          { id: "c1", type: "text", content: "La cybersécurité est un domaine crucial dans notre ère numérique..." },
+          { id: "img1", type: "image", url: "/images/cybersecurity-basics.png", position: "center" },
         ],
-      },
-      {
-        id: "m2",
-        title: "Comprendre les menaces courantes",
-        content: [
-          { type: "text", content: "Il existe de nombreuses menaces dans le monde numérique, notamment..." },
-          { type: "video", content: "/videos/common-threats.mp4", position: "left" },
-        ],
+        quiz_questions: [],
+        content_items: [],
+        course_id: "",
+        courseId: "",
+        duration: "",
+        quiz: [],
+        completed: false
       },
     ],
     quiz: {
       id: "q1",
-      questions: [
-        {
-          id: "q1_1",
-          question:
-            "Quel est le principe de base de la cybersécurité qui garantit que les données ne sont accessibles qu'aux personnes autorisées ?",
-          options: ["Intégrité", "Disponibilité", "Confidentialité", "Authenticité"],
-          correctAnswer: 2,
-        },
-        {
-          id: "q1_2",
-          question:
-            "Quelle technique est utilisée par les attaquants pour tromper les utilisateurs et les inciter à révéler des informations sensibles ?",
-          options: ["Malware", "Phishing", "Cryptage", "Pare-feu"],
-          correctAnswer: 1,
-        },
-      ],
+      questions: [],
+      type: "multiple-choice"
     },
+    slug: "",
+    category: "",
+    prerequisites: "",
+    instructor: "",
+    image: "",
+    tags: [],
+    students: 0,
+    rating: 0,
+    progress: 0
   }
 
   // In a real application, you would fetch the course based on the id
