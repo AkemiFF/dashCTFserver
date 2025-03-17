@@ -1,6 +1,9 @@
 "use client"
 
+import { useTextSelection } from "@/components/module/text-selection-context"
 import { Button } from "@/components/ui/button"
+import { getAuthHeader } from "@/lib/auth"
+import { BASE_URL } from "@/lib/host"
 import { motion } from "framer-motion"
 import { Check, Copy, Loader2, Sparkles, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -12,69 +15,141 @@ interface AIExplanationProps {
 }
 
 export function AIExplanation({ selectedText, position, onClose }: AIExplanationProps) {
-  const [explanation, setExplanation] = useState<string>("")
+  const [explanation, setExplanation] = useState("")
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Ajuster la position pour éviter que le popup sorte de l'écran
+  const { isRequestPending, setIsRequestPending, requestId } = useTextSelection()
+
+  const containerRef = useRef<HTMLDivElement>(null)
   const [adjustedPosition, setAdjustedPosition] = useState(position)
+  const controllerRef = useRef<AbortController | null>(null)
+  const fetchAttemptedRef = useRef(false)
 
   useEffect(() => {
-    if (containerRef.current) {
+    const adjustPosition = () => {
+      if (!containerRef.current) return
+
       const rect = containerRef.current.getBoundingClientRect()
-      const viewportWidth = window.innerWidth
-      const viewportHeight = window.innerHeight
-
-      let newX = position.x
-      let newY = position.y
-
-      // Ajuster horizontalement
-      if (position.x + rect.width > viewportWidth - 20) {
-        newX = viewportWidth - rect.width - 20
+      const viewport = {
+        width: window.innerWidth,
+        height: window.innerHeight,
       }
 
-      // Ajuster verticalement
-      if (position.y + rect.height > viewportHeight - 20) {
-        newY = position.y - rect.height - 10
-      }
-
-      setAdjustedPosition({ x: newX, y: newY })
+      setAdjustedPosition({
+        x: Math.min(position.x, viewport.width - rect.width - 20),
+        y: position.y + rect.height > viewport.height - 20 ? position.y - rect.height - 10 : position.y,
+      })
     }
+
+    adjustPosition()
   }, [position, explanation])
 
   useEffect(() => {
-    // Simuler une requête à l'API d'IA
-    const timer = setTimeout(() => {
-      // Générer une explication basée sur le texte sélectionné
-      const generateExplanation = () => {
-        if (selectedText.length < 10) {
-          return "Veuillez sélectionner un passage plus long pour obtenir une explication pertinente."
-        }
+    // Éviter les requêtes multiples
+    if (fetchAttemptedRef.current) {
+      console.log("Fetch already attempted, skipping")
+      return
+    }
 
-        // Simuler différentes explications selon le contenu
-        if (selectedText.toLowerCase().includes("javascript")) {
-          return "JavaScript est un langage de programmation qui permet d'implémenter des mécanismes complexes sur une page web. C'est un langage orienté objet à prototype, principalement utilisé côté client pour rendre les pages web interactives.\n\nJavaScript est essentiel au développement web moderne et constitue l'un des trois piliers du web avec HTML et CSS."
-        } else if (selectedText.toLowerCase().includes("react")) {
-          return "React est une bibliothèque JavaScript front-end développée par Facebook pour créer des interfaces utilisateur. Elle permet de construire des composants réutilisables qui présentent des données qui changent au fil du temps.\n\nReact utilise un DOM virtuel pour optimiser les performances de rendu et adopte un flux de données unidirectionnel."
-        } else if (selectedText.toLowerCase().includes("css")) {
-          return "CSS (Cascading Style Sheets) est un langage de feuille de style utilisé pour décrire la présentation d'un document écrit en HTML. CSS est conçu pour permettre la séparation de la présentation et du contenu.\n\nIl permet de contrôler la mise en page, les couleurs, les polices et l'apparence générale d'une page web."
-        } else {
-          return `Ce passage traite de concepts importants dans le domaine de l'informatique et du développement web. Voici une explication simplifiée:\n\n${selectedText.substring(0, 50)}... fait référence à ${selectedText.length > 100 ? "des principes fondamentaux qui sont essentiels à maîtriser pour progresser dans ce domaine" : "un concept spécifique qui mérite d'être approfondi"}.\n\nPour mieux comprendre, essayez de mettre en pratique ces concepts dans des projets concrets.`
-        }
+    const currentRequestId = requestId
+
+    const fetchExplanation = async () => {
+      if (!isRequestPending) {
+        console.log("Request not pending, skipping fetch")
+        return
       }
 
-      setExplanation(generateExplanation())
-      setLoading(false)
-    }, 1500)
+      fetchAttemptedRef.current = true
 
-    return () => clearTimeout(timer)
-  }, [selectedText])
+      try {
+        setLoading(true)
+        setExplanation("")
+
+        // Créer un nouveau contrôleur pour cette requête
+        if (controllerRef.current) {
+          controllerRef.current.abort()
+        }
+        controllerRef.current = new AbortController()
+
+        console.log(`Starting fetch for request ${currentRequestId}`)
+
+        const response = await fetch(`${BASE_URL}/api/chat/stream/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(await getAuthHeader()),
+          },
+          body: JSON.stringify({
+            prompt: selectedText,
+            requestId: currentRequestId, // Inclure l'ID de requête pour le suivi côté serveur
+          }),
+          signal: controllerRef.current.signal,
+        })
+
+        if (!response.body) throw new Error("No response body")
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ""
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const parts = buffer.split("\n\n")
+          buffer = parts.pop() || ""
+
+          for (const part of parts) {
+            const event = part.replace(/^data: /, "")
+            if (event === "[DONE]") break
+
+            try {
+              const data = JSON.parse(event)
+              if (data.content) {
+                setExplanation((prev) => prev + data.content)
+              }
+            } catch (e) {
+              console.error("Parse error:", e)
+            }
+          }
+        }
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error("Fetch error:", error)
+          setExplanation("Erreur lors de la génération de l'explication")
+        }
+      } finally {
+        setLoading(false)
+        setIsRequestPending(false)
+      }
+    }
+
+    if (selectedText.length > 3) {
+      fetchExplanation()
+    }
+
+    return () => {
+      if (controllerRef.current) {
+        console.log(`Aborting fetch for request ${currentRequestId}`)
+        controllerRef.current.abort()
+        controllerRef.current = null
+      }
+    }
+  }, [selectedText, requestId, isRequestPending, setIsRequestPending])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(explanation)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleClose = () => {
+    if (controllerRef.current) {
+      controllerRef.current.abort()
+    }
+    onClose()
   }
 
   return (
@@ -127,7 +202,7 @@ export function AIExplanation({ selectedText, position, onClose }: AIExplanation
             </div>
             <h3 className="font-medium text-white">Explication IA</h3>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full hover:bg-white/10" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full hover:bg-white/10" onClick={handleClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
