@@ -1,10 +1,11 @@
 "use client"
 
-import { useRef, useEffect, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import type React from "react"
+
 import { Button } from "@/components/ui/button"
+import { AnimatePresence, motion } from "framer-motion"
 import { Sparkles } from "lucide-react"
-import { AIExplanation } from "@/components/ai-explanation"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTextSelection } from "./text-selection-context"
 
 interface TextContentItemProps {
@@ -16,16 +17,19 @@ export function TextContentItem({ content }: TextContentItemProps) {
   const {
     selectedText,
     selectionPosition,
-    showAIExplanation,
+    isAIPanelOpen,
+    isRequestPending,
     setSelectedText,
     setSelectionPosition,
-    setShowAIExplanation,
-    clearSelection,
+    openAIPanel,
+    setIsRequestPending,
+    setRequestId,
   } = useTextSelection()
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const handleSelection = useCallback(() => {
-    // Si l'explication AI est déjà affichée, ne pas traiter de nouvelles sélections
-    if (showAIExplanation) return
+    // Si une requête est en cours, ne pas traiter de nouvelles sélections
+    if (isProcessing || isRequestPending) return
 
     const selection = window.getSelection()
     if (!selection) return
@@ -42,34 +46,23 @@ export function TextContentItem({ content }: TextContentItemProps) {
     if (!contentRef.current) return
 
     try {
+      setIsProcessing(true)
       const range = selection.getRangeAt(0)
       const rect = range.getBoundingClientRect()
 
-      // Vérifier si la sélection est à l'intérieur de ce composant
-      const componentRect = contentRef.current.getBoundingClientRect()
-      if (
-        rect.top < componentRect.top ||
-        rect.bottom > componentRect.bottom ||
-        rect.left < componentRect.left ||
-        rect.right > componentRect.right
-      ) {
-        return
-      }
-
-      console.log("Selection detected:", {
-        text: text.substring(0, 20) + "...",
-        position: { x: rect.left + rect.width / 2, y: rect.top },
-      })
+      // Vérifier la position
+      const componentRect = contentRef.current?.getBoundingClientRect()
+      if (!componentRect || !isWithinBounds(rect, componentRect)) return
 
       setSelectedText(text)
       setSelectionPosition({
         x: rect.left + rect.width / 2,
         y: rect.top,
       })
-    } catch (err) {
-      console.error("Error handling text selection:", err)
+    } finally {
+      setIsProcessing(false)
     }
-  }, [showAIExplanation, setSelectedText, setSelectionPosition])
+  }, [isProcessing, isRequestPending, setSelectedText, setSelectionPosition])
 
   useEffect(() => {
     const currentRef = contentRef.current
@@ -85,11 +78,28 @@ export function TextContentItem({ content }: TextContentItemProps) {
     }
   }, [handleSelection])
 
-  const handleAIExplain = () => {
+  const handleAIExplain = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     if (selectedText && selectionPosition) {
-      console.log("Showing AI explanation for:", selectedText.substring(0, 20) + "...")
-      setShowAIExplanation(true)
+      console.log("Ouverture du panneau IA")
+
+      // Générer un ID unique pour cette requête
+      const newRequestId = crypto.randomUUID()
+      setRequestId(newRequestId)
+      setIsRequestPending(true)
+      openAIPanel()
     }
+  }
+
+  const isWithinBounds = (rect: DOMRect, container: DOMRect) => {
+    return (
+      rect.top >= container.top &&
+      rect.bottom <= container.bottom &&
+      rect.left >= container.left &&
+      rect.right <= container.right
+    )
   }
 
   return (
@@ -101,7 +111,7 @@ export function TextContentItem({ content }: TextContentItemProps) {
       />
 
       <AnimatePresence>
-        {selectedText && selectionPosition && !showAIExplanation && (
+        {selectedText && selectionPosition && !isRequestPending && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -122,12 +132,6 @@ export function TextContentItem({ content }: TextContentItemProps) {
               Expliquer avec l'IA
             </Button>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showAIExplanation && selectedText && selectionPosition && (
-          <AIExplanation selectedText={selectedText} position={selectionPosition} onClose={clearSelection} />
         )}
       </AnimatePresence>
     </div>

@@ -1,14 +1,19 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 interface TextSelectionContextType {
   selectedText: string | null
   selectionPosition: { x: number; y: number } | null
-  showAIExplanation: boolean
+  isAIPanelOpen: boolean
+  isRequestPending: boolean
+  requestId: string | null
   setSelectedText: (text: string | null) => void
   setSelectionPosition: (position: { x: number; y: number } | null) => void
-  setShowAIExplanation: (show: boolean) => void
+  openAIPanel: () => void
+  closeAIPanel: () => void
+  setIsRequestPending: (isPending: boolean) => void
+  setRequestId: (id: string | null) => void
   clearSelection: () => void
 }
 
@@ -17,13 +22,24 @@ const TextSelectionContext = createContext<TextSelectionContextType | undefined>
 export function TextSelectionProvider({ children }: { children: ReactNode }) {
   const [selectedText, setSelectedText] = useState<string | null>(null)
   const [selectionPosition, setSelectionPosition] = useState<{ x: number; y: number } | null>(null)
-  const [showAIExplanation, setShowAIExplanation] = useState(false)
+  const [isAIPanelOpen, setIsAIPanelOpen] = useState(false)
+  const [isRequestPending, setIsRequestPending] = useState(false)
+  const [requestId, setRequestId] = useState<string | null>(null)
+
+  const openAIPanel = () => {
+    setIsAIPanelOpen(true)
+  }
+
+  const closeAIPanel = () => {
+    setIsAIPanelOpen(false)
+  }
 
   const clearSelection = () => {
     window.getSelection()?.removeAllRanges()
     setSelectedText(null)
     setSelectionPosition(null)
-    setShowAIExplanation(false)
+    setIsRequestPending(false)
+    setRequestId(null)
   }
 
   return (
@@ -31,10 +47,15 @@ export function TextSelectionProvider({ children }: { children: ReactNode }) {
       value={{
         selectedText,
         selectionPosition,
-        showAIExplanation,
+        isAIPanelOpen,
+        isRequestPending,
+        requestId,
         setSelectedText,
         setSelectionPosition,
-        setShowAIExplanation,
+        openAIPanel,
+        closeAIPanel,
+        setIsRequestPending,
+        setRequestId,
         clearSelection,
       }}
     >
