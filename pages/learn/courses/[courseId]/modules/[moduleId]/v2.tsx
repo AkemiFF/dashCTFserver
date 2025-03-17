@@ -1,6 +1,6 @@
 "use client"
 
-import { AIExplanation } from "@/components/ai-explanation"
+import { AIExplanation } from "@/components/ai/ai-explanation"
 import ProtectedRoute from "@/components/protected-route"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"

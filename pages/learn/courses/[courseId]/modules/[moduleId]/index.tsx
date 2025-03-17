@@ -15,6 +15,7 @@ import { KeyboardShortcuts } from "@/components/module/keyboard-shortcuts"
 import { ModuleHeader } from "@/components/module/module-header"
 import QuizSection from "@/components/module/quiz-section"
 import { TableOfContents } from "@/components/module/table-of-contents"
+import { TextContentItem } from "@/components/module/text-content-item"
 import { TextSelectionProvider } from "@/components/module/text-selection-context"
 
 // Constantes pour la configuration
@@ -367,39 +368,40 @@ export default function ModulePage() {
   if (debugInfo && process.env.NODE_ENV === "development") {
     console.log("Debug info:", debugInfo)
   }
-
+  const currentContent = contentSets[currentContentIndex]?.[0] || null
   return (
     <ProtectedRoute>
       <TextSelectionProvider>
-        <div className={`min-h-screen bg-navy-950 text-white ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
-          {debugMode && (
-            <div className="bg-red-900/50 p-2 text-xs">
-              <div className="container mx-auto">
-                <details>
-                  <summary className="cursor-pointer font-mono">Debug Info</summary>
-                  <pre className="mt-2 p-2 bg-black/50 rounded overflow-auto max-h-96">
-                    {JSON.stringify(
-                      {
-                        params,
-                        courseId,
-                        moduleId,
-                        moduleData: moduleData ? "(data available)" : null,
-                        module: module ? "(module available)" : null,
-                        error,
-                        loading,
-                        contentLength: module?.content?.length || 0,
-                        quizLength: module?.quiz?.length || 0,
-                        contentSets: contentSets.length,
-                        currentContentIndex,
-                      },
-                      null,
-                      2,
-                    )}
-                  </pre>
-                </details>
-              </div>
+        <div
+          className={`min-h-screen bg-gradient-to-b from-gray-900 to-black text-white ${isFullscreen ? "fixed inset-0 z-50" : ""}`}
+        >          {debugMode && (
+          <div className="bg-red-900/50 p-2 text-xs">
+            <div className="container mx-auto">
+              <details>
+                <summary className="cursor-pointer font-mono">Debug Info</summary>
+                <pre className="mt-2 p-2 bg-black/50 rounded overflow-auto max-h-96">
+                  {JSON.stringify(
+                    {
+                      params,
+                      courseId,
+                      moduleId,
+                      moduleData: moduleData ? "(data available)" : null,
+                      module: module ? "(module available)" : null,
+                      error,
+                      loading,
+                      contentLength: module?.content?.length || 0,
+                      quizLength: module?.quiz?.length || 0,
+                      contentSets: contentSets.length,
+                      currentContentIndex,
+                    },
+                    null,
+                    2,
+                  )}
+                </pre>
+              </details>
             </div>
-          )}
+          </div>
+        )}
 
           <div className="container mx-auto px-4 py-8">
             {/* En-tête du module */}
@@ -419,13 +421,16 @@ export default function ModulePage() {
             <Card className="border border-white/10 bg-white/5 backdrop-blur-sm">
               <CardContent className="pt-6">
                 {currentStep === "content" ? (
-                  <ContentViewer
-                    contentSets={contentSets}
-                    currentContentIndex={currentContentIndex}
-                    setCurrentContentIndex={setCurrentContentIndex}
-                    totalItems={module.content?.length || 0}
-                    setCurrentStep={setCurrentStep}
-                  />
+                  <>
+                    <ContentViewer
+                      contentSets={contentSets}
+                      currentContentIndex={currentContentIndex}
+                      setCurrentContentIndex={setCurrentContentIndex}
+                      totalItems={module.content?.length || 0}
+                      setCurrentStep={setCurrentStep}
+                    />
+                    <TextContentItem content={currentContent?.type === "text" ? currentContent.content : ""} />
+                  </>
                 ) : (
                   <QuizSection
                     questions={module.quiz || []}
