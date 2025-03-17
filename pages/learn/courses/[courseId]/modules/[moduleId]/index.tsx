@@ -1,5 +1,13 @@
 "use client"
 
+import { AISidePanel } from "@/components/ai/ai-side-panel"
+import { ContentViewer } from "@/components/module/content-viewer"
+import { KeyboardShortcuts } from "@/components/module/keyboard-shortcuts"
+import { ModuleHeader } from "@/components/module/module-header"
+import QuizSection from "@/components/module/quiz-section"
+import { TableOfContents } from "@/components/module/table-of-contents"
+import { TextContentItem } from "@/components/module/text-content-item"
+import { TextSelectionProvider } from "@/components/module/text-selection-context"
 import ProtectedRoute from "@/components/protected-route"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -9,22 +17,11 @@ import { ArrowLeft } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
-// Importation des composants modulaires
-import { ContentViewer } from "@/components/module/content-viewer"
-import { KeyboardShortcuts } from "@/components/module/keyboard-shortcuts"
-import { ModuleHeader } from "@/components/module/module-header"
-import QuizSection from "@/components/module/quiz-section"
-import { TableOfContents } from "@/components/module/table-of-contents"
-import { TextContentItem } from "@/components/module/text-content-item"
-import { TextSelectionProvider } from "@/components/module/text-selection-context"
-
 // Constantes pour la configuration
 const ITEMS_PER_PAGE = 4
 const AUTO_SCROLL_INTERVAL = 30000 // 30 secondes par page en mode lecture automatique
 
 const adaptContentItem = (item: any): ContentItem => {
-
-
   console.log("Adapting content item:", item)
 
   const baseItem = {
@@ -169,7 +166,6 @@ export default function ModulePage() {
                 }))
                 : [],
               completed: data.completed || false,
-
             }
 
             console.log("Adapted module:", adaptedModule)
@@ -368,45 +364,48 @@ export default function ModulePage() {
   if (debugInfo && process.env.NODE_ENV === "development") {
     console.log("Debug info:", debugInfo)
   }
+
   const currentContent = contentSets[currentContentIndex]?.[0] || null
+
   return (
     <ProtectedRoute>
       <TextSelectionProvider>
         <div
           className={`min-h-screen bg-gradient-to-b from-gray-900 to-black text-white ${isFullscreen ? "fixed inset-0 z-50" : ""}`}
-        >          {debugMode && (
-          <div className="bg-red-900/50 p-2 text-xs">
-            <div className="container mx-auto">
-              <details>
-                <summary className="cursor-pointer font-mono">Debug Info</summary>
-                <pre className="mt-2 p-2 bg-black/50 rounded overflow-auto max-h-96">
-                  {JSON.stringify(
-                    {
-                      params,
-                      courseId,
-                      moduleId,
-                      moduleData: moduleData ? "(data available)" : null,
-                      module: module ? "(module available)" : null,
-                      error,
-                      loading,
-                      contentLength: module?.content?.length || 0,
-                      quizLength: module?.quiz?.length || 0,
-                      contentSets: contentSets.length,
-                      currentContentIndex,
-                    },
-                    null,
-                    2,
-                  )}
-                </pre>
-              </details>
+        >
+          {debugMode && (
+            <div className="bg-red-900/50 p-2 text-xs">
+              <div className="container mx-auto">
+                <details>
+                  <summary className="cursor-pointer font-mono">Debug Info</summary>
+                  <pre className="mt-2 p-2 bg-black/50 rounded overflow-auto max-h-96">
+                    {JSON.stringify(
+                      {
+                        params,
+                        courseId,
+                        moduleId,
+                        moduleData: moduleData ? "(data available)" : null,
+                        module: module ? "(module available)" : null,
+                        error,
+                        loading,
+                        contentLength: module?.content?.length || 0,
+                        quizLength: module?.quiz?.length || 0,
+                        contentSets: contentSets.length,
+                        currentContentIndex,
+                      },
+                      null,
+                      2,
+                    )}
+                  </pre>
+                </details>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
           <div className="container mx-auto px-4 py-8">
             {/* En-tête du module */}
             <ModuleHeader
-              courseId={courseId || ''}
+              courseId={courseId || ""}
               title={module.title}
               duration={module.duration}
               currentStep={currentStep}
@@ -441,15 +440,6 @@ export default function ModulePage() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 {currentStep === "content" ? (
-                  // <div className="w-full flex justify-end">
-                  //   <Button
-                  //     onClick={() => setCurrentStep("quiz")}
-                  //     className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-                  //   >
-                  //     Passer au quiz
-                  //     <ArrowRight className="h-4 w-4 ml-2" />
-                  //   </Button>
-                  // </div>
                   <></>
                 ) : (
                   <div className="w-full flex justify-start">
@@ -479,6 +469,9 @@ export default function ModulePage() {
 
           {/* Raccourcis clavier */}
           <KeyboardShortcuts isFullscreen={isFullscreen} />
+
+          {/* Panneau latéral IA */}
+          <AISidePanel />
         </div>
       </TextSelectionProvider>
     </ProtectedRoute>
