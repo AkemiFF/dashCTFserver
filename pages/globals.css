@@ -114,3 +114,18 @@
 .ai-pulse {
   animation: pulse-glow 2s infinite;
 }
+
+.char-animation {
+  opacity: 0;
+  animation: fadeIn 0.1s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

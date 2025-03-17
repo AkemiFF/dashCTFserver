@@ -7,7 +7,7 @@ export interface AIMessage {
 
 export interface AIConversation {
   id: string
+  title: string
   messages: AIMessage[]
-  title?: string
 }
 
