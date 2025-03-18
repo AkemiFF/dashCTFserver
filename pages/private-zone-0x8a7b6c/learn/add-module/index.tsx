@@ -250,11 +250,6 @@ export default function AddModulePage() {
   // This would typically come from your API or state management
   const mockCourses = referenceData.courses
 
-  // Ajoutons également un console.log dans le rendu pour déboguer
-  // Ajoutez ceci juste avant le return dans le composant principal:
-
-  console.log("Current module data:", currentData)
-
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-6xl">
