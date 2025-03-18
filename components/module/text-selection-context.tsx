@@ -27,14 +27,17 @@ export function TextSelectionProvider({ children }: { children: ReactNode }) {
   const [requestId, setRequestId] = useState<string | null>(null)
 
   const openAIPanel = () => {
+    console.log("Opening AI panel")
     setIsAIPanelOpen(true)
   }
 
   const closeAIPanel = () => {
+    console.log("Closing AI panel")
     setIsAIPanelOpen(false)
   }
 
   const clearSelection = () => {
+    console.log("Clearing selection")
     window.getSelection()?.removeAllRanges()
     setSelectedText(null)
     setSelectionPosition(null)
