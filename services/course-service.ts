@@ -43,10 +43,8 @@ const mockCourses: Course[] = [
                         question: "Quels sont les trois piliers fondamentaux de la cybersécurité ?",
                         type: "multiple-choice",
                         options: [
-                            "Confidentialité, Intégrité, Disponibilité",
-                            "Prévention, Détection, Réaction",
-                            "Authentification, Autorisation, Audit",
-                            "Chiffrement, Firewall, Antivirus",
+                            { id: "o3", text: "Authentification, Autorisation, Audit" },
+                            { id: "o3", text: "Authentification, Autorisation, Audit" },
                         ],
                         correctAnswer: "Confidentialité, Intégrité, Disponibilité",
                     },
@@ -89,7 +87,9 @@ const mockCourses: Course[] = [
                         id: "q1",
                         question: "Quelle technique d'attaque consiste à envoyer des emails frauduleux imitant une entité légitime ?",
                         type: "multiple-choice",
-                        options: ["Phishing", "Malware", "DDoS", "Man-in-the-middle"],
+                        options: [{ id: "o3", text: "Authentification, Autorisation, Audit" }, { id: "o3", text: "Authentification, Autorisation, Audit" },
+
+                        ],
                         correctAnswer: "Phishing",
                     },
                     {
