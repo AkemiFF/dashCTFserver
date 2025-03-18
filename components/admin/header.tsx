@@ -16,7 +16,7 @@ export default function Header() {
   }
 
   return (
-    <header className="flex h-16 items-center px-6 border-b border-border bg-card/50 backdrop-blur-xl">
+    <div className="flex h-16 items-center px-6 border-b border-border bg-card/50 backdrop-blur-xl">
       <div className="flex flex-1 items-center space-x-4">
         <div className="relative w-96">
           <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -64,7 +64,7 @@ export default function Header() {
           </DropdownMenu>
         </div>
       </div>
-    </header>
+    </div>
   )
 }
 
