@@ -37,8 +37,10 @@ export function AISidePanel() {
 
   const controllerRef = useRef<AbortController | null>(null)
   const initialRequestProcessedRef = useRef(false)
+  const isProcessingRef = useRef(false) // Verrou pour éviter les requêtes multiples
   const promptInputRef = useRef<HTMLTextAreaElement>(null)
   const conversationEndRef = useRef<HTMLDivElement>(null)
+  const lastRequestIdRef = useRef<string | null>(null)
 
   // Créer une nouvelle conversation avec le texte sélectionné
   useEffect(() => {
@@ -57,19 +59,54 @@ export function AISidePanel() {
 
   // Fonction unifiée pour envoyer des messages à l'API
   const sendMessageToAPI = async (message: string, isInitialRequest = false) => {
+    // Vérifications de sécurité
     if (!message.trim() || !currentConversation) {
       console.warn("Cannot send message: empty message or no conversation")
       return
     }
+
+    // Vérifier si nous sommes déjà en train de traiter une requête
+    if (isProcessingRef.current) {
+      console.warn("Already processing a request, ignoring this one")
+      return
+    }
+
+    // Pour les requêtes initiales, vérifier si nous avons déjà traité cette requête
+    if (isInitialRequest) {
+      if (initialRequestProcessedRef.current) {
+        console.warn("Initial request already processed, ignoring")
+        return
+      }
+
+      // Vérifier si l'ID de requête est le même que le dernier traité
+      if (requestId && requestId === lastRequestIdRef.current) {
+        console.warn("Duplicate request ID detected, ignoring:", requestId)
+        return
+      }
+
+      // Mettre à jour le dernier ID de requête traité
+      lastRequestIdRef.current = requestId || null
+    }
+
+    // Définir le verrou
+    isProcessingRef.current = true
 
     try {
       setLoading(true)
 
       // Ajouter le message utilisateur à la conversation
       // Seulement si ce n'est pas la requête initiale ou si c'est la première fois
-      if (!isInitialRequest || !initialRequestProcessedRef.current) {
+      if (!isInitialRequest) {
         console.log("Adding user message to conversation:", message)
         addMessage(currentConversation.id, "user", message)
+      } else {
+        console.log("Processing initial request with text:", message)
+        // Pour la requête initiale, ajouter le message utilisateur une seule fois
+        if (!initialRequestProcessedRef.current) {
+          addMessage(currentConversation.id, "user", message)
+          // Marquer comme traitée immédiatement pour éviter les doublons
+          initialRequestProcessedRef.current = true
+        }
       }
 
       // Annuler toute requête précédente
@@ -130,11 +167,6 @@ export function AISidePanel() {
       // Ajouter la réponse à la conversation
       console.log("Adding assistant response to conversation")
       addMessage(currentConversation.id, "assistant", fullResponse)
-
-      // Marquer la requête initiale comme traitée
-      if (isInitialRequest) {
-        initialRequestProcessedRef.current = true
-      }
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "AbortError")) {
         console.error("Fetch error:", error)
@@ -152,28 +184,33 @@ export function AISidePanel() {
 
       // Vider le champ de saisie
       setNewPrompt("")
+
+      // Libérer le verrou
+      isProcessingRef.current = false
     }
   }
 
-  // Traiter la requête initiale (texte sélectionné)
+  // Traiter la requête initiale (texte sélectionné) - avec une dépendance réduite
   useEffect(() => {
-    const processInitialRequest = async () => {
-      // Vérifier si nous avons une requête en attente, un texte sélectionné, et une conversation
+    // Utiliser une fonction auto-exécutée pour éviter les problèmes de async/await dans useEffect
+    ; (async () => {
+      // Vérifier si nous avons une requête en attente et si nous ne sommes pas déjà en train de traiter
       if (
         isRequestPending &&
+        !isProcessingRef.current &&
+        !initialRequestProcessedRef.current &&
         selectedText &&
         selectedText.length > 3 &&
         currentConversation &&
-        isAIPanelOpen &&
-        !initialRequestProcessedRef.current
+        isAIPanelOpen
       ) {
-        console.log("Processing initial request with selected text")
+        console.log("Initial request detected, processing...")
         await sendMessageToAPI(selectedText, true)
       }
-    }
+    })()
 
-    processInitialRequest()
-  }, [isRequestPending, selectedText, currentConversation, isAIPanelOpen])
+    // Dépendances réduites pour éviter les déclenchements multiples
+  }, [isRequestPending, currentConversation, isAIPanelOpen])
 
   const handleClose = () => {
     if (controllerRef.current) {
@@ -183,12 +220,14 @@ export function AISidePanel() {
     closeAIPanel()
     clearSelection()
     initialRequestProcessedRef.current = false
+    isProcessingRef.current = false
+    lastRequestIdRef.current = null
   }
 
   const handleSubmitPrompt = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (newPrompt.trim() && !loading && currentConversation) {
+    if (newPrompt.trim() && !loading && currentConversation && !isProcessingRef.current) {
       console.log("Submitting user prompt:", newPrompt)
       await sendMessageToAPI(newPrompt.trim())
     }

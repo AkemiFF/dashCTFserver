@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { Sparkles } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 
 export function AIExplainButton() {
@@ -14,6 +14,7 @@ export function AIExplainButton() {
 
   const [hasSelection, setHasSelection] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const isProcessingRef = useRef(false)
 
   // Mettre à jour l'état de sélection
   useEffect(() => {
@@ -21,10 +22,21 @@ export function AIExplainButton() {
   }, [selectedText])
 
   const handleExplain = () => {
-    if (!hasSelection || isRequestPending) return
+    // Vérifier si nous pouvons déclencher une explication
+    if (!hasSelection || isRequestPending || isProcessingRef.current) {
+      console.log("Cannot trigger explanation:", {
+        hasSelection,
+        isRequestPending,
+        isProcessing: isProcessingRef.current,
+      })
+      return
+    }
+
+    // Définir le verrou
+    isProcessingRef.current = true
 
     try {
-      // Générer un ID unique pour cette requête (utiliser uuidv4 au lieu de crypto.randomUUID())
+      // Générer un ID unique pour cette requête
       const newRequestId = uuidv4()
       console.log("Generating new request with ID:", newRequestId)
 
@@ -37,6 +49,11 @@ export function AIExplainButton() {
     } catch (error) {
       console.error("Error in handleExplain:", error)
       setIsRequestPending(false)
+    } finally {
+      // Libérer le verrou après un court délai pour éviter les clics multiples
+      setTimeout(() => {
+        isProcessingRef.current = false
+      }, 500)
     }
   }
 
@@ -70,7 +87,7 @@ export function AIExplainButton() {
         <span
           className={cn(
             "font-medium transition-all duration-300",
-            isHovered && hasSelection ? "opacity-100 max-w-40" : "opacity-0 max-w-0 overflow-hidden",
+            isHovered && hasSelection && !isAIPanelOpen ? "opacity-100 max-w-40" : "opacity-0 max-w-0 overflow-hidden",
           )}
         >
           Expliquer avec l'IA
