@@ -177,64 +177,73 @@ export default function GenerateModulePage() {
             content: prev.content.filter((_, i) => i !== index),
         }))
     }
-
     const handleGenerateWithAI = async () => {
         if (!currentData.courseId || !aiPrompt) {
-            setError("Veuillez sélectionner un cours et fournir une description pour la génération.")
-            return
+            setError("Veuillez sélectionner un cours et fournir une description pour la génération.");
+            return;
         }
 
-        setIsGenerating(true)
-        setError(null)
+        setIsGenerating(true);
+        setError(null);
 
         try {
-            // Simuler un appel à une API d'IA
-            // Dans un cas réel, vous feriez un appel à votre API d'IA ici
-            await new Promise((resolve) => setTimeout(resolve, 2000))
+            const requestData = {
+                course_id: currentData.courseId,
+                prompt: aiPrompt,
+            };
 
-            // Exemple de réponse simulée de l'IA
-            const aiResponse = {
-                title: `Module généré: ${aiPrompt.split(" ").slice(0, 3).join(" ")}...`,
-                duration: "2h 30min",
-                content: [
-                    {
-                        type: "text",
-                        content: `<h1>Introduction</h1><p>Bienvenue dans ce module sur ${aiPrompt}. Nous allons explorer les concepts fondamentaux et les applications pratiques.</p><p>Ce module a été généré automatiquement par l'IA en fonction de votre demande.</p>`,
-                    },
-                    {
-                        type: "text",
-                        content: `<h2>Objectifs d'apprentissage</h2><ul><li>Comprendre les principes de base</li><li>Maîtriser les techniques avancées</li><li>Appliquer les connaissances dans des situations réelles</li></ul>`,
-                    },
-                    {
-                        type: "link",
-                        url: "https://example.com/resources",
-                        description: "Ressources complémentaires",
-                    },
-                    {
-                        type: "text",
-                        content: `<h2>Contenu principal</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p><p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>`,
-                    },
-                ],
+            const response = await fetch(`${BASE_URL}/api/chat/generate-module/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(await getAdminAuthHeader()),
+                },
+                body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
             }
 
-            // Mettre à jour les données avec la réponse de l'IA
-            setCurrentData((prev) => ({
-                ...prev,
-                title: aiResponse.title,
-                duration: aiResponse.duration,
-                content: aiResponse.content as ContentItem[],
-            }))
+            // Attendre la réponse complète
+            const completeResponse = await response.json();
+            console.log(completeResponse)
+            // Valider la structure de la réponse
+            if (!completeResponse.content) {
+                throw new Error("Réponse du serveur invalide");
+            }
 
-            // Générer le JSON pour l'affichage
-            const jsonString = JSON.stringify(aiResponse, null, 2)
-            setJsonData(jsonString)
-            setShowJsonDialog(true)
+            // Parser le contenu JSON final
+            const parsedData = typeof completeResponse === "string"
+                ? JSON.parse(completeResponse)
+                : completeResponse;
+            console.log("Parsed ", parsedData);
+
+            // Mettre à jour l'état directement avec les données finales
+            setCurrentData(prev => ({
+                ...prev,
+                title: parsedData.title || prev.title,
+                duration: parsedData.duration || prev.duration,
+                content: parsedData.content || prev.content,
+            }));
+
+            // Mettre à jour l'affichage JSON
+            setJsonData(JSON.stringify(parsedData, null, 2));
+
+            // Afficher la dialog si contenu valide
+            if (parsedData.content?.length > 0) {
+                setShowJsonDialog(true);
+            } else {
+                setError("La génération n'a pas produit de contenu valide.");
+            }
+
         } catch (error) {
-            setError(`Erreur lors de la génération: ${(error as Error).message}`)
+            setError(`Erreur lors de la génération: ${(error as Error).message}`);
+            console.error("Erreur complète:", error);
         } finally {
-            setIsGenerating(false)
+            setIsGenerating(false);
         }
-    }
+    };
 
     const handleImportJson = () => {
         try {
