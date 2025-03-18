@@ -129,3 +129,19 @@
     opacity: 1;
   }
 }
+
+.markdown-content {
+  @apply text-sm;
+}
+
+.markdown-content pre {
+  @apply overflow-x-auto;
+}
+
+.markdown-content code {
+  @apply font-mono text-xs;
+}
+
+.markdown-content img {
+  @apply max-w-full h-auto rounded-md my-2;
+}
