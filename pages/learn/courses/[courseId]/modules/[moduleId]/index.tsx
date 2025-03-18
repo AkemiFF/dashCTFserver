@@ -1,5 +1,6 @@
 "use client"
 
+import { AIExplainButton } from "@/components/ai/ai-explain-button"
 import { AISidePanel } from "@/components/ai/ai-side-panel"
 import { ContentViewer } from "@/components/module/content-viewer"
 import { KeyboardShortcuts } from "@/components/module/keyboard-shortcuts"
@@ -469,6 +470,7 @@ export default function ModulePage() {
 
           {/* Raccourcis clavier */}
           <KeyboardShortcuts isFullscreen={isFullscreen} />
+          <AIExplainButton />
 
           {/* Panneau latéral IA */}
           <AISidePanel />
