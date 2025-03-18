@@ -75,6 +75,8 @@
     "react-resizable-panels": "^2.1.7",
     "react-toastify": "^11.0.3",
     "recharts": "2.15.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
     "sonner": "^1.7.1",
     "style-loader": "^4.0.0",
     "swr": "^2.3.3",
@@ -82,6 +84,8 @@
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
     "vaul": "^0.9.6",
+    "vfile": "^6.0.3",
+    "vfile-message": "^4.0.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
