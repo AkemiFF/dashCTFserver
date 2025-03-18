@@ -18,9 +18,11 @@ import remarkGfm from "remark-gfm"
 import { v4 as uuidv4 } from "uuid"
 
 export function AISidePanel() {
+  const [explanation, setExplanation] = useState("")
   const [loading, setLoading] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [newPrompt, setNewPrompt] = useState("")
+  const [submittingPrompt, setSubmittingPrompt] = useState(false)
 
   const {
     selectedText,
@@ -36,14 +38,13 @@ export function AISidePanel() {
   const { conversations, currentConversation, createConversation, addMessage, switchConversation } = useAIConversation()
 
   const controllerRef = useRef<AbortController | null>(null)
-  const initialRequestProcessedRef = useRef(false)
+  const fetchAttemptedRef = useRef(false)
   const promptInputRef = useRef<HTMLTextAreaElement>(null)
   const conversationEndRef = useRef<HTMLDivElement>(null)
 
   // Créer une nouvelle conversation avec le texte sélectionné
   useEffect(() => {
     if (selectedText && isAIPanelOpen && !currentConversation) {
-      console.log("Creating new conversation with selected text:", selectedText)
       createConversation(selectedText)
     }
   }, [selectedText, isAIPanelOpen, currentConversation, createConversation])
@@ -55,33 +56,152 @@ export function AISidePanel() {
     }
   }, [currentConversation?.messages, loading])
 
-  // Fonction unifiée pour envoyer des messages à l'API
-  const sendMessageToAPI = async (message: string, isInitialRequest = false) => {
-    if (!message.trim() || !currentConversation) {
-      console.warn("Cannot send message: empty message or no conversation")
+  // Fetch l'explication
+  useEffect(() => {
+    if (fetchAttemptedRef.current || !currentConversation || !isAIPanelOpen) {
       return
     }
+
+    const currentRequestId = requestId || uuidv4()
+    // Ajoutez cette nouvelle fonction dans le composant AISidePanel
+
+
+    // Assurez-vous que l'affichage des messages utilise toujours currentConversation.messages
+    // (Le code JSX existant reste inchangé car il affiche déjà tous les messages)
+    const fetchExplanation = async () => {
+      if (!isRequestPending && !submittingPrompt) {
+        return
+      }
+
+      fetchAttemptedRef.current = true
+
+      try {
+        setLoading(true)
+        setExplanation("")
+
+        if (controllerRef.current) {
+          controllerRef.current.abort()
+        }
+        controllerRef.current = new AbortController()
+
+        const promptToSend = submittingPrompt ? newPrompt : selectedText || ""
+
+        // Ajouter le message utilisateur à la conversation
+        if (submittingPrompt && currentConversation) {
+          addMessage(currentConversation.id, "user", promptToSend)
+        }
+
+        console.log(`Envoi d'une requête avec ID ${currentRequestId}`)
+
+        const response = await fetch(`${BASE_URL}/api/chat/stream/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(await getAuthHeader()),
+          },
+          body: JSON.stringify({
+            prompt: promptToSend,
+            requestId: currentRequestId,
+            conversationId: currentConversation?.id,
+          }),
+          signal: controllerRef.current.signal,
+        })
+
+        if (!response.body) throw new Error("No response body")
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ""
+        let fullResponse = ""
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const parts = buffer.split("\n\n")
+          buffer = parts.pop() || ""
+
+          for (const part of parts) {
+            const event = part.replace(/^data: /, "")
+            if (event === "[DONE]") break
+
+            try {
+              const data = JSON.parse(event)
+              if (data.content) {
+                fullResponse += data.content
+                setExplanation(fullResponse)
+              }
+            } catch (e) {
+              console.error("Parse error:", e)
+            }
+          }
+        }
+
+        // Ajouter la réponse à la conversation
+        if (currentConversation) {
+          addMessage(currentConversation.id, "assistant", fullResponse)
+        }
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error("Fetch error:", error)
+          setExplanation("Erreur lors de la génération de l'explication")
+
+          // Ajouter le message d'erreur à la conversation
+          if (currentConversation) {
+            addMessage(currentConversation.id, "assistant", "Erreur lors de la génération de l'explication")
+          }
+        }
+      } finally {
+        setLoading(false)
+        setIsRequestPending(false)
+        setSubmittingPrompt(false)
+        setNewPrompt("")
+      }
+    }
+
+    if ((selectedText && selectedText.length > 3 && !submittingPrompt) || (submittingPrompt && newPrompt.length > 0)) {
+      fetchExplanation()
+    }
+
+    return () => {
+      if (controllerRef.current) {
+        controllerRef.current.abort()
+        controllerRef.current = null
+      }
+    }
+  }, [
+    selectedText,
+    requestId,
+    isRequestPending,
+    submittingPrompt,
+    newPrompt,
+    currentConversation,
+    addMessage,
+    isAIPanelOpen,
+  ])
+
+  const handleClose = () => {
+    if (controllerRef.current) {
+      controllerRef.current.abort()
+    }
+    closeAIPanel()
+    clearSelection()
+    fetchAttemptedRef.current = false
+  }
+  const fetchUserMessage = async (userPrompt: string) => {
+    if (!currentConversation || !userPrompt.trim()) return
 
     try {
       setLoading(true)
 
-      // Ajouter le message utilisateur à la conversation
-      // Seulement si ce n'est pas la requête initiale ou si c'est la première fois
-      if (!isInitialRequest || !initialRequestProcessedRef.current) {
-        console.log("Adding user message to conversation:", message)
-        addMessage(currentConversation.id, "user", message)
-      }
+      // Ajouter le message utilisateur immédiatement
+      addMessage(currentConversation.id, "user", userPrompt)
 
-      // Annuler toute requête précédente
       if (controllerRef.current) {
         controllerRef.current.abort()
       }
       controllerRef.current = new AbortController()
-
-      // Générer un ID de requête si nécessaire
-      const currentRequestId = isInitialRequest ? requestId || uuidv4() : uuidv4()
-
-      console.log(`Sending request with ID ${currentRequestId}`)
 
       const response = await fetch(`${BASE_URL}/api/chat/stream/`, {
         method: "POST",
@@ -90,8 +210,7 @@ export function AISidePanel() {
           ...(await getAuthHeader()),
         },
         body: JSON.stringify({
-          prompt: message,
-          requestId: currentRequestId,
+          prompt: userPrompt,
           conversationId: currentConversation.id,
         }),
         signal: controllerRef.current.signal,
@@ -103,6 +222,10 @@ export function AISidePanel() {
       const decoder = new TextDecoder()
       let buffer = ""
       let fullResponse = ""
+
+      // Ajouter un message assistant vide dès le début
+      const tempMessageId = uuidv4()
+      addMessage(currentConversation.id, "assistant", "")
 
       while (true) {
         const { done, value } = await reader.read()
@@ -120,89 +243,55 @@ export function AISidePanel() {
             const data = JSON.parse(event)
             if (data.content) {
               fullResponse += data.content
+              // Mettre à jour le message assistant en temps réel
+              addMessage(currentConversation.id, "assistant", fullResponse)
             }
           } catch (e) {
             console.error("Parse error:", e)
           }
         }
       }
-
-      // Ajouter la réponse à la conversation
-      console.log("Adding assistant response to conversation")
-      addMessage(currentConversation.id, "assistant", fullResponse)
-
-      // Marquer la requête initiale comme traitée
-      if (isInitialRequest) {
-        initialRequestProcessedRef.current = true
-      }
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "AbortError")) {
-        console.error("Fetch error:", error)
-
-        // Ajouter le message d'erreur à la conversation
-        addMessage(currentConversation.id, "assistant", "Erreur lors de la génération de l'explication")
+        addMessage(currentConversation.id, "assistant", "Erreur lors de la génération de la réponse")
       }
     } finally {
       setLoading(false)
-
-      // Réinitialiser l'état de la requête si c'était la requête initiale
-      if (isInitialRequest) {
-        setIsRequestPending(false)
-      }
-
-      // Vider le champ de saisie
       setNewPrompt("")
     }
   }
 
-  // Traiter la requête initiale (texte sélectionné)
-  useEffect(() => {
-    const processInitialRequest = async () => {
-      // Vérifier si nous avons une requête en attente, un texte sélectionné, et une conversation
-      if (
-        isRequestPending &&
-        selectedText &&
-        selectedText.length > 3 &&
-        currentConversation &&
-        isAIPanelOpen &&
-        !initialRequestProcessedRef.current
-      ) {
-        console.log("Processing initial request with selected text")
-        await sendMessageToAPI(selectedText, true)
-      }
-    }
-
-    processInitialRequest()
-  }, [isRequestPending, selectedText, currentConversation, isAIPanelOpen])
-
-  const handleClose = () => {
-    if (controllerRef.current) {
-      controllerRef.current.abort()
-    }
-
-    closeAIPanel()
-    clearSelection()
-    initialRequestProcessedRef.current = false
-  }
-
+  // Modifiez la fonction handleSubmitPrompt pour utiliser la nouvelle fonction
   const handleSubmitPrompt = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (newPrompt.trim() && !loading && currentConversation) {
-      console.log("Submitting user prompt:", newPrompt)
-      await sendMessageToAPI(newPrompt.trim())
+    if (newPrompt.trim() && !loading) {
+      await fetchUserMessage(newPrompt.trim())
+      setSubmittingPrompt(true)
+      fetchAttemptedRef.current = false
     }
   }
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSubmitPrompt(e as unknown as React.FormEvent)
+      handleSubmitPrompt(e)
     }
   }
 
   if (!isAIPanelOpen) {
-    return null // Ne rien afficher si le panneau est fermé
+    return (
+      <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
+        <Button
+          onClick={openAIPanel}
+          variant="ghost"
+          className="h-12 w-12 rounded-l-lg bg-black/40 backdrop-blur-sm border-l border-y border-white/10 hover:bg-black/60"
+          title="Ouvrir l'assistant IA"
+        >
+          <Sparkles className="h-5 w-5 text-pink-400" />
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -281,7 +370,7 @@ export function AISidePanel() {
         {/* Conversation actuelle */}
         <div className={cn("flex flex-col", showHistory ? "w-2/3" : "w-full")}>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {currentConversation?.messages.map((msg) => (
+            {currentConversation?.messages.map((msg, index) => (
               <div key={msg.id} className={cn("flex flex-col", msg.role === "user" ? "items-end" : "items-start")}>
                 <div className="text-xs text-white/40 mb-1">{msg.role === "user" ? "Vous" : "Assistant"}</div>
                 <div
@@ -315,13 +404,7 @@ export function AISidePanel() {
                             {...props}
                           />
                         ),
-                        code: ({
-                          node,
-                          className,
-                          children,
-                          inline,
-                          ...props
-                        }: { node?: any; inline?: boolean; className?: string; children?: React.ReactNode }) => {
+                        code: ({ node, className, children, inline, ...props }: { node?: any, inline?: boolean, className?: string, children?: React.ReactNode }) => {
                           if (inline) {
                             return (
                               <code
@@ -397,12 +480,12 @@ export function AISidePanel() {
                 onKeyDown={handleKeyDown}
                 placeholder="Posez une question..."
                 className="min-h-[40px] max-h-[120px] bg-black/20 border-white/10 resize-none"
-                disabled={loading}
+                disabled={loading || submittingPrompt}
               />
               <Button
                 type="submit"
                 size="icon"
-                disabled={loading || !newPrompt.trim() || !currentConversation}
+                disabled={loading || submittingPrompt || !newPrompt.trim()}
                 className="h-10 w-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
               >
                 <Send className="h-4 w-4" />
