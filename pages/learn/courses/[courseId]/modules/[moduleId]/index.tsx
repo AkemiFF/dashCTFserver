@@ -158,18 +158,29 @@ export default function ModulePage() {
                 ? data.content_items.map(adaptContentItem).filter(Boolean)
                 : [],
               quiz: Array.isArray(data.quiz_questions)
-                ? data.quiz_questions.map((q: any) => ({
-                  id: q.id?.toString() || Math.random().toString(36).substring(7),
-                  question: q.question || "",
-                  type: q.type || "multiple-choice",
-                  options: q.options || [],
-                  correctAnswer: q.correct_answer || "",
-                }))
+                ? data.quiz_questions.map((q: any) => {
+                  // Trouver la(les) bonne(s) réponse(s)
+                  const correctAnswers = q.options
+                    .filter((opt: any) => opt.is_correct)
+                    .map((opt: any) => opt.id.toString());
+
+                  return {
+                    id: q.id?.toString() || Math.random().toString(36).substring(7),
+                    question: q.question || "",
+                    type: q.type || "multiple-choice",
+                    options: q.options.map((opt: any) => ({
+                      id: opt.id.toString(),
+                      text: opt.text,
+                    })),
+                    correctAnswer: correctAnswers.length === 1 ? correctAnswers[0] : correctAnswers,
+                  };
+                })
                 : [],
               completed: data.completed || false,
             }
 
             console.log("Adapted module:", adaptedModule)
+            console.log("Base data:", data)
             setModule(adaptedModule)
 
             // Diviser le contenu en groupes de ITEMS_PER_PAGE pour la pagination
@@ -436,6 +447,7 @@ export default function ModulePage() {
                     questions={module.quiz || []}
                     setCurrentStep={setCurrentStep}
                     onCompleteModule={handleCompleteModule}
+                    moduleId={moduleId}
                   />
                 )}
               </CardContent>
