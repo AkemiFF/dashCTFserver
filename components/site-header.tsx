@@ -12,17 +12,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { UserApiService } from "@/services/users"
 import { AnimatePresence, motion } from "framer-motion"
 import { Bell, Home, LogOut, Menu, MessageCircle, Search, Shield, Terminal, Trophy, User, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export function SiteHeader({ unreadNotifications }: { unreadNotifications: number }) {
   const pathname = usePathname()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const unreadNotificationsCount = 5 // This would normally come from a state or context
+  const [userData, setUserData] = useState<{ avatar: string }>({ avatar: "" })
+
+  useEffect(() => {
+    UserApiService.fetchUserData().then((data) => { setUserData(data) })
+  }, []);
 
   return (
     <motion.header
@@ -113,7 +119,7 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar>
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="@user" />
+                      <AvatarImage src={userData?.avatar} alt="@user" />
                       <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500 text-white">
                         JD
                       </AvatarFallback>
@@ -127,7 +133,7 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                   <div className="p-2 border-b border-white/10">
                     <div className="flex items-center gap-3 p-2">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src="/placeholder.svg?height=40&width=40" alt="@user" />
+                        <AvatarImage src={userData?.avatar} alt="@user" />
                         <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500 text-white">
                           JD
                         </AvatarFallback>
