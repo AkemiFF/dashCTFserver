@@ -1,5 +1,5 @@
-import type { Course, Module } from "@/types/course"
-import apiClient from "./api-client"
+import type { Course, Module, QuizQuestion } from "@/types/course"
+import apiClient, { apiAdmin } from "./api-client"
 
 // Type pour les réponses de quiz
 interface QuizSubmissionResponse {
@@ -7,7 +7,12 @@ interface QuizSubmissionResponse {
   total: number
   feedback: Record<string, { correct: boolean; feedback?: string }>
 }
-
+interface QuizQuestionCreate {
+  question: string
+  type: "multiple-choice" | "open-ended"
+  order: number
+  options: { text: string; is_correct: boolean }[]
+}
 // Service pour interagir avec l'API des cours
 export const CourseApiService = {
   // Récupérer tous les cours
@@ -15,6 +20,27 @@ export const CourseApiService = {
     try {
       const response = await apiClient.get("/learn/courses")
       return response.data
+    } catch (error) {
+      console.error("Error fetching courses:", error)
+      throw error
+    }
+  },
+  getAllCoursesAdmin: async (): Promise<Course[]> => {
+    try {
+      const response = await apiAdmin.get("/learn/courses")
+      const res = response.data
+      return res.results
+    } catch (error) {
+      console.error("Error fetching courses:", error)
+      throw error
+    }
+  },
+  getAllModules: async (): Promise<Module[]> => {
+    try {
+      const response = await apiAdmin.get("/learn/modules/")
+      const res = response.data.results
+      console.log(res)
+      return res
     } catch (error) {
       console.error("Error fetching courses:", error)
       throw error
@@ -42,13 +68,83 @@ export const CourseApiService = {
       throw error
     }
   },
+  getAllModulesQuizzes: async (moduleId: string): Promise<Module[]> => {
+    try {
+      const response = await apiClient.get(`/learn/modules/${moduleId}/quiz/`)
+      return response.data
+    } catch (error) {
+      console.error(`Error fetching module ${moduleId}:`, error)
+      throw error
+    }
+  },
+
+  // Récupérer toutes les questions de quiz pour un module
+  getAllQuizQuestions: async (moduleId: string): Promise<QuizQuestion[]> => {
+    try {
+      const response = await apiAdmin.get(`/learn/modules/${moduleId}/quiz/`)
+
+      // Transformer les données de l'API au format attendu par le frontend
+      return response.data.map((item: any) => ({
+        id: item.id.toString(),
+        question: item.question,
+        type: item.type,
+        options:
+          item.options?.map((opt: any) => ({
+            id: opt.id.toString(),
+            text: opt.text,
+            is_correct: opt.is_correct,
+          })) || [],
+        correctAnswer:
+          item.type === "multiple-choice"
+            ? item.options?.filter((opt: any) => opt.is_correct).map((opt: any) => opt.id.toString()) || []
+            : undefined,
+      }))
+    } catch (error) {
+      console.error(`Error fetching quiz questions for module ${moduleId}:`, error)
+      throw error
+    }
+  },
+  createQuizQuestion: async (moduleId: string, questionData: QuizQuestionCreate): Promise<QuizQuestion> => {
+    try {
+      const response = await apiAdmin.post(`/learn/admin/modules/${moduleId}/quizzes/`, questionData)
+      return response.data
+    } catch (error) {
+      console.error(`Error creating quiz question for module ${moduleId}:`, error)
+      throw error
+    }
+  },
+  // Mettre à jour une question de quiz existante
+  updateQuizQuestion: async (
+    moduleId: string,
+    questionId: string,
+    questionData: QuizQuestionCreate,
+  ): Promise<QuizQuestion> => {
+    try {
+      const response = await apiAdmin.put(`/learn/modules/${moduleId}/quiz/${questionId}/`, questionData)
+      return response.data
+    } catch (error) {
+      console.error(`Error updating quiz question ${questionId}:`, error)
+      throw error
+    }
+  },
+
+  // Supprimer une question de quiz
+  deleteQuizQuestion: async (moduleId: string, questionId: string): Promise<void> => {
+    try {
+      await apiAdmin.delete(`/learn/modules/${moduleId}/quiz/${questionId}/`)
+    } catch (error) {
+      console.error(`Error deleting quiz question ${questionId}:`, error)
+      throw error
+    }
+  },
 
   // Marquer un module comme complété
-  completeModule: async (courseId: string, moduleId: string): Promise<void> => {
+  completeModule: async (courseId: string, moduleId: string, timeSpent: number): Promise<void> => {
     try {
-      await apiClient.post(`/learn/user/progress/complete-module`, {
+      await apiClient.post(`/learn/modules/${moduleId}/complete/`, {
         course_id: courseId,
         module_id: moduleId,
+        time_spent: timeSpent,
       })
     } catch (error) {
       console.error(`Error completing module ${moduleId}:`, error)
@@ -56,6 +152,17 @@ export const CourseApiService = {
     }
   },
 
+  CreateQuizModules: async (moduleId: string, data: any): Promise<Module[]> => {
+    try {
+      const response = await apiClient.post(`/learn/admin/modules/${moduleId}/quizzes/`, {
+        data,
+      })
+      return response.data
+    } catch (error) {
+      console.error(`Error fetching module ${moduleId}:`, error)
+      throw error
+    }
+  },
   // Soumettre les réponses d'un quiz
   submitQuizAnswers: async (
     courseId: string,
@@ -120,7 +227,7 @@ export const CourseApiService = {
   // S'inscrire à un cours
   enrollInCourse: async (courseId: string): Promise<void> => {
     try {
-      await apiClient.post(`/learn/user/courses/${courseId}/enroll`)
+      await apiClient.post(`/learn/courses/${courseId}/enroll/`)
     } catch (error) {
       console.error(`Error enrolling in course ${courseId}:`, error)
       throw error
