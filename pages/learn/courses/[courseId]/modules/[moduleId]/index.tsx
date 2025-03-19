@@ -299,12 +299,12 @@ export default function ModulePage() {
   }
 
   // Fonction pour marquer le module comme terminé
-  const handleCompleteModule = async () => {
+  const handleCompleteModule = async (timeSpent: number) => {
     if (!courseId || !moduleId) return
 
     try {
       setCompletingModule(true)
-      await CourseApiService.completeModule(courseId, moduleId)
+      await CourseApiService.completeModule(courseId, moduleId, timeSpent)
       router.push(`/learn/courses/${courseId}`)
     } catch (error) {
       console.error("Error completing module:", error)
