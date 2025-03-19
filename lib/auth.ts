@@ -84,6 +84,15 @@ export const getClientToken = async (): Promise<string | null> => {
     }
     return token;
 };
+export const getAdminToken = async (): Promise<string | null> => {
+    let token: string | null;
+    if (!isAdminAuthenticated()) {
+        token = await refreshAdminToken();
+    } else {
+        token = getAdminAccessToken();
+    }
+    return token;
+};
 
 export const getAuthHeaderFormData = async (): Promise<HeadersInit> => {
     let token: string | null;
