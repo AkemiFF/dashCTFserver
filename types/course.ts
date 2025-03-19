@@ -47,7 +47,7 @@ export interface QuizQuestion {
   id: string
   question: string
   type: "multiple-choice" | "open-ended"
-  options?: { id: string; text: string }[];
+  options?: { id: string; text: string, is_correct?: boolean }[];
   correctAnswer?: string | string[]
 }
 export interface Quiz {
