@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 interface QuizSectionProps {
   questions: QuizQuestion[]
   setCurrentStep?: Dispatch<SetStateAction<"content" | "quiz">>
-  onCompleteModule?: () => Promise<void>
+  onCompleteModule?: (timeUsed: number) => Promise<void>
   moduleTitle?: string
   moduleId: string | null
 }
@@ -310,7 +310,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
 
   const handleCompleteModule = async () => {
     if (onCompleteModule) {
-      await onCompleteModule()
+      await onCompleteModule(timeSpent)
     }
     if (setCurrentStep) {
       setCurrentStep("content")
