@@ -20,6 +20,7 @@ const ProtectedRoute = dynamic(() => import("@/components/protected-route"), {
 
 export default function CourseDetailPage({ params }: { params: { courseId: string } }) {
   const router = useRouter()
+  const [id, setId] = useState<string | null>(null)
   const [course, setCourse] = useState<Course | null>(null)
   const [activeTab, setActiveTab] = useState("modules")
   const [loading, setLoading] = useState(true)
@@ -29,7 +30,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   const [enrolling, setEnrolling] = useState(false)
   const [enrollmentSuccess, setEnrollmentSuccess] = useState(false)
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null)
-  const [id, setId] = useState<string | null>(null)
+
 
   // Remplacer la fonction useEffect qui charge le cours
   useEffect(() => {
@@ -80,9 +81,9 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   const handleEnrollCourse = async () => {
     try {
       setEnrolling(true)
-      await CourseApiService.enrollInCourse(params.courseId)
+      await CourseApiService.enrollInCourse(id || "")
       // Recharger les données du cours après l'inscription
-      const updatedCourse = await CourseApiService.getCourseById(params.courseId)
+      const updatedCourse = await CourseApiService.getCourseById(id || "")
       setCourse(updatedCourse)
       setEnrollmentSuccess(true)
     } catch (error) {
