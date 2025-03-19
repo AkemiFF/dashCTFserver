@@ -18,6 +18,8 @@ import { AnimatePresence, motion } from "framer-motion"
 import { PlusCircle, Sparkles } from "lucide-react"
 import { useEffect, useState } from "react"
 
+
+
 export default function Home() {
   const [init, setInit] = useState(false)
   const [activeView, setActiveView] = useState<"feed" | "discover" | "trending">("feed")
