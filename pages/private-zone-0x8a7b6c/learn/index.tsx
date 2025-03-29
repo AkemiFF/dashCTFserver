@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authFetchAdmin } from "@/lib/api"
 import { BASE_URL } from "@/lib/host"
 import type { Course } from "@/types/course"
-import { BookOpen, PlusCircle } from "lucide-react"
+import { BookOpen, GemIcon, PlusCircle } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
@@ -81,6 +81,12 @@ export default function LearnPage() {
               <Button variant="outline">
                 <BookOpen className="mr-2 h-4 w-4" />
                 Ajouter un module
+              </Button>
+            </Link>
+            <Link href="learn/generate-module">
+              <Button variant="outline">
+                <GemIcon className="mr-2 h-4 w-4" />
+                Générer un module
               </Button>
             </Link>
           </div>
