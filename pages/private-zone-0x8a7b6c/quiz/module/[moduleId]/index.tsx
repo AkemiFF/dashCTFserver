@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ADMIN_NAME } from "@/lib/host"
 import { CourseApiService } from "@/services/course-api-service"
 import { QuizQuestion } from "@/types/course"
-import { AlertCircle, ArrowLeft, Edit, FileQuestion, Plus, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, Edit, FileQuestion, Plus, Trash2, Wand2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
@@ -137,18 +137,27 @@ export default function ModuleQuizPage() {
                 )}
 
                 <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-sm">
-                            {questions.length} question{questions.length !== 1 ? "s" : ""}
-                        </Badge>
+                    <div className="flex justify-between items-center">
+                        <div className="flex gap-2">
+                            <Link href={`${ADMIN_NAME}/quiz/module/${moduleId}/add`}>
+                                <Button className="flex items-center">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Ajouter des questions
+                                </Button>
+                            </Link>
+                            <Link href={`${ADMIN_NAME}/quiz/module/${moduleId}/generate`}>
+                                <Button variant="outline" className="flex items-center">
+                                    <Wand2 className="mr-2 h-4 w-4" />
+                                    Générer avec l'IA
+                                </Button>
+                            </Link>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-sm">
+                                {questions.length} question{questions.length !== 1 ? "s" : ""}
+                            </Badge>
+                        </div>
                     </div>
-
-                    <Link href={`${ADMIN_NAME}/quiz/module/${moduleId}/add`}>
-                        <Button className="flex items-center">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Ajouter des questions
-                        </Button>
-                    </Link>
                 </div>
 
                 {loading ? (
