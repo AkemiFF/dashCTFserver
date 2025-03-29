@@ -13,33 +13,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { authFetchAdmin } from "@/lib/api"
 import { getAdminAuthHeader, getAdminAuthHeaderFormData } from "@/lib/auth"
 import { ADMIN_NAME, BASE_URL } from "@/lib/host"
-import { AlertCircle, ArrowDown, ArrowUp, FileText, Image, Link, Plus, Trash2, Type, Video } from "lucide-react"
+import {
+  AlertCircle,
+  ArrowDown,
+  ArrowUp,
+  FileText,
+  Image,
+  LinkIcon,
+  Sparkles,
+  Trash2,
+  Type,
+  Video,
+  Wand2,
+} from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 type Course = {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  level: string;
-  category: string;
-  duration: string;
-  instructor: string;
-  image: string;
-  students: number;
-  rating: string;
-  progress: number;
-};
+  id: string
+  title: string
+  slug: string
+  description: string
+  level: string
+  category: string
+  duration: string
+  instructor: string
+  image: string
+  students: number
+  rating: string
+  progress: number
+}
 
 type ReferenceData = {
-  courses: Course[];
-  levels: string[];
-  categories: string[];
-  tags: string[];
-};
-
-
+  courses: Course[]
+  levels: string[]
+  categories: string[]
+  tags: string[]
+}
 
 type ContentItem =
   | { type: "text"; content: string }
@@ -57,46 +68,47 @@ export default function AddModulePage() {
     content: [] as ContentItem[],
   })
   const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setCurrentData((prev) => ({ ...prev, [name]: value }))
   }
+
   const [referenceData, setReferenceData] = useState<ReferenceData>({
     courses: [],
     levels: [],
     categories: [],
     tags: [],
-  });
+  })
+
   const handleSelectChange = (name: string, value: string) => {
     setCurrentData((prev) => ({ ...prev, [name]: value }))
   }
+
   useEffect(() => {
     const fetchReferenceData = async () => {
       try {
-        const response = await authFetchAdmin(`${BASE_URL}/api/learn/admin/reference-data/`);
+        const response = await authFetchAdmin(`${BASE_URL}/api/learn/admin/reference-data/`)
 
         if (!response.ok) {
-          throw new Error('Erreur lors de la récupération des données de référence');
+          throw new Error("Erreur lors de la récupération des données de référence")
         }
 
-        const data = await response.json();
+        const data = await response.json()
         setReferenceData({
           courses: data.courses,
           levels: data.levels,
           categories: data.categories,
           tags: data.tags,
-        });
+        })
       } catch (error) {
-        setError((error as Error).message);
+        setError((error as Error).message)
       }
-    };
+    }
 
-    fetchReferenceData();
-  }, []);
-
-  // Le problème est probablement lié à la façon dont nous gérons les types dans la fonction addContentItem.
-  // Remplaçons la fonction addContentItem par cette version corrigée :
+    fetchReferenceData()
+  }, [])
 
   const addContentItem = (type: ContentItem["type"]) => {
     let newItem: ContentItem
@@ -121,9 +133,7 @@ export default function AddModulePage() {
         newItem = { type: "text", content: "" }
     }
 
-    // Utilisons une fonction de mise à jour d'état plus explicite
     setCurrentData((prevState) => {
-      console.log("Adding content item:", newItem)
       return {
         ...prevState,
         content: [...prevState.content, newItem],
@@ -154,16 +164,18 @@ export default function AddModulePage() {
       content: prev.content.filter((_, i) => i !== index),
     }))
   }
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
     if (!currentData.courseId || !currentData.title || currentData.content.length === 0) {
-      setError('Veuillez remplir tous les champs obligatoires et ajouter du contenu.');
-      return;
+      setError("Veuillez remplir tous les champs obligatoires et ajouter du contenu.")
+      return
     }
 
     try {
-      const token = localStorage.getItem('token');
+      setIsSubmitting(true)
+      setError(null)
 
       // Créer un objet pour la requête
       const modulePayload: { course: string; title: string; duration: string; points: number } = {
@@ -171,84 +183,80 @@ export default function AddModulePage() {
         title: currentData.title,
         duration: currentData.duration,
         points: 10, // Valeur par défaut
-      };
+      }
 
       // Créer le module
       const moduleResponse = await fetch(`${BASE_URL}/api/learn/admin/modules/`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          ... await getAdminAuthHeader()
+          ...(await getAdminAuthHeader()),
         },
-        body: JSON.stringify(modulePayload)
-      });
+        body: JSON.stringify(modulePayload),
+      })
 
       if (!moduleResponse.ok) {
-        const errorData = await moduleResponse.json();
-        throw new Error(errorData.error || 'Erreur lors de la création du module');
+        const errorData = await moduleResponse.json()
+        throw new Error(errorData.error || "Erreur lors de la création du module")
       }
 
-      const moduleData = await moduleResponse.json();
-      const moduleId = moduleData.id;
-      console.log(moduleData)
+      const moduleData = await moduleResponse.json()
+      const moduleId = moduleData.id
+
       // Ajouter les éléments de contenu
       for (let i = 0; i < currentData.content.length; i++) {
-        const item = currentData.content[i];
-        const formData = new FormData();
+        const item = currentData.content[i]
+        const formData = new FormData()
 
-        formData.append('type', item.type);
-        formData.append('order', i.toString());
+        formData.append("type", item.type)
+        formData.append("order", i.toString())
 
-        if (item.type === 'text') {
-          formData.append('content', item.content);
-        } else if (item.type === 'image') {
+        if (item.type === "text") {
+          formData.append("content", item.content)
+        } else if (item.type === "image") {
           if (item.file) {
-            formData.append('image', item.file);
+            formData.append("image", item.file)
           }
-          formData.append('image_position', item.position);
-        } else if (item.type === 'video') {
-          if (item.platform === 'upload' && item.file) {
-            formData.append('video_file', item.file);
-            formData.append('video_platform', 'upload');
+          formData.append("image_position", item.position)
+        } else if (item.type === "video") {
+          if (item.platform === "upload" && item.file) {
+            formData.append("video_file", item.file)
+            formData.append("video_platform", "upload")
           } else {
-            formData.append('video_url', item.url);
-            formData.append('video_platform', item.platform);
+            formData.append("video_url", item.url)
+            formData.append("video_platform", item.platform)
           }
-        } else if (item.type === 'file') {
+        } else if (item.type === "file") {
           if (item.file) {
-            formData.append('file', item.file);
+            formData.append("file", item.file)
           }
-          formData.append('file_description', item.description);
-        } else if (item.type === 'link') {
-          formData.append('link_url', item.url);
-          formData.append('link_description', item.description);
+          formData.append("file_description", item.description)
+        } else if (item.type === "link") {
+          formData.append("link_url", item.url)
+          formData.append("link_description", item.description)
         }
 
         const contentResponse = await fetch(`${BASE_URL}/api/learn/admin/modules/${moduleId}/add_content/`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            ...await getAdminAuthHeaderFormData()
+            ...(await getAdminAuthHeaderFormData()),
           },
-          body: formData
-        });
+          body: formData,
+        })
 
         if (!contentResponse.ok) {
-          const errorData = await contentResponse.json();
-          throw new Error(errorData.error || `Erreur lors de l'ajout du contenu ${i + 1}`);
+          const errorData = await contentResponse.json()
+          throw new Error(errorData.error || `Erreur lors de l'ajout du contenu ${i + 1}`)
         }
       }
 
-      console.log('Module créé avec succès');
-
       // Rediriger vers la liste des modules
-      router.push(`${ADMIN_NAME}/learn`);
+      router.push(`${ADMIN_NAME}/learn`)
     } catch (error) {
-      setError((error as Error).message);
+      setError((error as Error).message)
+    } finally {
+      setIsSubmitting(false)
     }
-  };
-
-
-  // This would typically come from your API or state management
-  const mockCourses = referenceData.courses
+  }
 
   return (
     <Layout>
@@ -256,6 +264,21 @@ export default function AddModulePage() {
         <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">
           Ajouter un nouveau module
         </h1>
+
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              className="border-white/10 text-white hover:bg-white/10 flex items-center gap-2"
+              asChild
+            >
+              <Link href={`${ADMIN_NAME}/modules/generate`}>
+                <Wand2 className="h-4 w-4" /> Générer avec l'IA
+              </Link>
+            </Button>
+          </div>
+        </div>
+
         <Card className="border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
           <form onSubmit={handleSubmit}>
             <CardHeader>
@@ -280,7 +303,7 @@ export default function AddModulePage() {
                       <SelectValue placeholder="Sélectionnez un cours" />
                     </SelectTrigger>
                     <SelectContent className="bg-navy-900 border-white/10 text-white">
-                      {mockCourses.map((course) => (
+                      {referenceData.courses.map((course) => (
                         <SelectItem key={course.id} value={course.id}>
                           {course.title}
                         </SelectItem>
@@ -296,6 +319,7 @@ export default function AddModulePage() {
                     value={currentData.title}
                     onChange={handleInputChange}
                     className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
+                    placeholder="Saisissez le titre du module"
                     required
                   />
                 </div>
@@ -315,7 +339,10 @@ export default function AddModulePage() {
               </div>
 
               <div className="space-y-4">
-                <Label>Contenu du module</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-lg font-medium">Contenu du module</Label>
+                </div>
+
                 <div className="space-y-4">
                   {currentData.content.map((item, index) => (
                     <Card
@@ -486,7 +513,7 @@ export default function AddModulePage() {
                             />
                             {item.url && (
                               <div className="mt-2 p-3 bg-white/5 rounded-md flex items-center gap-2">
-                                <Link className="h-5 w-5 text-white/70" />
+                                <LinkIcon className="h-5 w-5 text-white/70" />
                                 <a
                                   href={item.url}
                                   target="_blank"
@@ -534,6 +561,7 @@ export default function AddModulePage() {
                     </Card>
                   ))}
                 </div>
+
                 <div className="flex flex-wrap gap-2 justify-center">
                   <Button
                     type="button"
@@ -573,7 +601,7 @@ export default function AddModulePage() {
                     onClick={() => addContentItem("link")}
                     className="border-white/10 text-white hover:bg-white/10"
                   >
-                    <Link className="mr-2 h-4 w-4" /> Lien
+                    <LinkIcon className="mr-2 h-4 w-4" /> Lien
                   </Button>
                 </div>
               </div>
@@ -581,9 +609,19 @@ export default function AddModulePage() {
             <CardFooter>
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
               >
-                <Plus className="mr-2 h-4 w-4" /> Ajouter le module
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    Enregistrement...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" /> Ajouter le module
+                  </>
+                )}
               </Button>
             </CardFooter>
           </form>
