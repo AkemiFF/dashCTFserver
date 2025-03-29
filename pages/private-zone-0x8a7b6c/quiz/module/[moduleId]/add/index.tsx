@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { ADMIN_NAME } from "@/lib/host"
 import { CourseApiService } from "@/services/course-api-service"
 import { AlertCircle, ArrowLeft, Plus, Save, Trash2 } from "lucide-react"
 import { useRouter } from "next/router"
@@ -52,7 +53,6 @@ export default function AddQuizQuestionsPage() {
             try {
                 setLoading(true)
                 const moduleData = await CourseApiService.getModuleById("", moduId)
-                console.log(moduleData.title);
 
                 setModuleTitle(moduleData.title)
             } catch (err) {
@@ -231,7 +231,7 @@ export default function AddQuizQuestionsPage() {
             }
 
             // Rediriger vers la page du module
-            router.push(`/admin/quiz/module/${moduleId}`)
+            router.push(`${ADMIN_NAME}/quiz/module/${moduleId}`)
         } catch (err) {
             console.error("Error saving questions:", err)
             setError("Une erreur est survenue lors de l'enregistrement des questions.")
