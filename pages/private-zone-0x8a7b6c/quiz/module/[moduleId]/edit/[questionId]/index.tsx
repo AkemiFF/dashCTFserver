@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { ADMIN_NAME } from "@/lib/host"
 import { CourseApiService } from "@/services/course-api-service"
 import { AlertCircle, ArrowLeft, Plus, X } from "lucide-react"
 import { useRouter } from "next/router"
@@ -41,6 +42,7 @@ export default function EditQuestionPage() {
         const moduId = (router.query.moduleId as string)
         const questId = (router.query.questionId as string)
         setModuleId(moduId)
+        setQuestionId(questId)
         setIsReady(true)
 
         const fetchQuestion = async () => {
@@ -147,8 +149,7 @@ export default function EditQuestionPage() {
             // Send to API
             await CourseApiService.updateQuizQuestion(moduleId, questionId, questionData)
 
-            // Redirect back to module questions page
-            router.push(`/admin/quiz/module/${moduleId}`)
+            router.push(`${ADMIN_NAME}/quiz/module/${moduleId}`)
         } catch (err) {
             console.error("Error updating question:", err)
             setError("Une erreur est survenue lors de la mise à jour de la question.")
