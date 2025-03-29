@@ -39,7 +39,6 @@ export const CourseApiService = {
     try {
       const response = await apiAdmin.get("/learn/modules/")
       const res = response.data.results
-      console.log(res)
       return res
     } catch (error) {
       console.error("Error fetching courses:", error)
