@@ -240,7 +240,7 @@ export function RichTextEditor({
   }
 
   return (
-    <div className="border rounded-md shadow-sm bg-white dark:bg-gray-950">
+    <div className="border rounded-md shadow-sm bg-gray-950">
       <Tabs defaultValue="edit" className="w-full">
         <div className="flex items-center justify-between border-b px-3 py-2">
           <TabsList className="grid w-[200px] grid-cols-2">
