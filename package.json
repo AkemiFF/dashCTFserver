@@ -42,6 +42,7 @@
     "@uiw/react-md-editor": "^3.6.6",
     "autoprefixer": "^10.4.20",
     "axios": "^1.8.3",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
@@ -90,8 +91,10 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jest": "^29.5.14",
     "@types/js-cookie": "^3.0.6",
+    "@types/next": "^8.0.7",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
