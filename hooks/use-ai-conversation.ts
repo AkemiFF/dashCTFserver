@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import type { AIConversation, AIMessage } from "@/types/ai-conversation"
+import type { AIConversation, AIMessage } from "@/services/types/ai-conversation"
 import { v4 as uuidv4 } from "uuid"
 
 export function useAIConversation() {
@@ -13,13 +13,13 @@ export function useAIConversation() {
       id: uuidv4(),
       messages: initialPrompt
         ? [
-            {
-              id: uuidv4(),
-              role: "user",
-              content: initialPrompt,
-              timestamp: new Date(),
-            },
-          ]
+          {
+            id: uuidv4(),
+            role: "user",
+            content: initialPrompt,
+            timestamp: new Date(),
+          },
+        ]
         : [],
       title: initialPrompt
         ? initialPrompt.substring(0, 30) + (initialPrompt.length > 30 ? "..." : "")
@@ -56,9 +56,9 @@ export function useAIConversation() {
         setCurrentConversation((prev) =>
           prev
             ? {
-                ...prev,
-                messages: [...prev.messages, newMessage],
-              }
+              ...prev,
+              messages: [...prev.messages, newMessage],
+            }
             : null,
         )
       }
