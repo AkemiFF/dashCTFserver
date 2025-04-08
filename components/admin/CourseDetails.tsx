@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import type { Course } from "@/types/course"
+import type { Course } from "@/services/types/course"
 import Link from "next/link"
 
 interface CourseDetailsProps {

@@ -726,7 +726,7 @@ export function RichTextEditor({
         </TabsContent>
       </Tabs>
 
-      <style jsx global>{`
+      <style >{`
         .rich-text-preview h1 {
           font-size: 1.75rem;
           font-weight: 700;

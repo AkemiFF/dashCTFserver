@@ -1,6 +1,6 @@
 "use client"
 
-import type { QuizQuestion } from "@/types/course"
+import type { QuizQuestion } from "@/services/types/course"
 import { AlertCircle, CheckCircle, ChevronRight, Clock, RotateCcw, XCircle } from "lucide-react"
 import type React from "react"
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react"

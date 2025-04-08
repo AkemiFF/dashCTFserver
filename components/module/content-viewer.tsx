@@ -4,7 +4,7 @@ import { useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
-import type { ContentItem as ContentItemType } from "@/types/course"
+import type { ContentItem as ContentItemType } from "@/services/types/course"
 import { ContentItem } from "./content-item"
 
 interface ContentViewerProps {
@@ -128,9 +128,8 @@ export function ContentViewer({
               <button
                 key={pageToShow}
                 onClick={() => setCurrentContentIndex(pageToShow)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  pageToShow === currentContentIndex ? "bg-pink-500 text-white" : "bg-white/10 hover:bg-white/20"
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${pageToShow === currentContentIndex ? "bg-pink-500 text-white" : "bg-white/10 hover:bg-white/20"
+                  }`}
               >
                 {pageToShow + 1}
               </button>

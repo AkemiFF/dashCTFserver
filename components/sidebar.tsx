@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { UserBaseData } from "@/types/users"
+import { UserBaseData } from "@/services/types/users"
 import { motion } from "framer-motion"
 import {
   Bell,

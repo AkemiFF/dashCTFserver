@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ADMIN_NAME } from "@/lib/host"
-import type { Course } from "@/types/course"
+import type { Course } from "@/services/types/course"
 import { BookOpen, Clock } from "lucide-react"
 import Link from "next/link"
 

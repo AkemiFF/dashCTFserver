@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Module } from "@/types/course"
+import type { Module } from "@/services/types/course"
 import Image from "next/image"
 
 interface CourseModuleProps {

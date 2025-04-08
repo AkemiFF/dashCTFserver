@@ -1,6 +1,6 @@
 "use client"
 
-import type { ContentItem } from "@/types/course"
+import type { ContentItem } from "@/services/types/course"
 import { Drawer, DrawerContent } from "@/components/ui/drawer"
 
 interface TableOfContentsProps {
@@ -61,14 +61,12 @@ export function TableOfContents({
                     setCurrentContentIndex(pageIndex)
                     setIsOpen(false)
                   }}
-                  className={`w-full text-left p-2 rounded-lg transition-colors flex items-center gap-2 ${
-                    isCurrentPage ? "bg-white/10 text-white" : "hover:bg-white/5 text-white/70"
-                  }`}
+                  className={`w-full text-left p-2 rounded-lg transition-colors flex items-center gap-2 ${isCurrentPage ? "bg-white/10 text-white" : "hover:bg-white/5 text-white/70"
+                    }`}
                 >
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                      isCurrentPage ? "bg-pink-500 text-white" : "bg-white/10"
-                    }`}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${isCurrentPage ? "bg-pink-500 text-white" : "bg-white/10"
+                      }`}
                   >
                     {index + 1}
                   </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import type { ContentItem as ContentItemType } from "@/types/course"
+import type { ContentItem as ContentItemType } from "@/services/types/course"
 import { TextContentItem } from "./text-content-item"
 import { Button } from "@/components/ui/button"
 
