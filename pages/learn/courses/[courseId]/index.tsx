@@ -11,7 +11,7 @@ import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 // Remplacer l'import du CourseService
 import { CourseApiService } from "@/services/course-api-service"
-import type { Course } from "@/types/course"
+import type { Course } from "@/services/types/course"
 import dynamic from "next/dynamic"
 // Ajouter l'import pour ProtectedRoute
 const ProtectedRoute = dynamic(() => import("@/components/protected-route"), {
