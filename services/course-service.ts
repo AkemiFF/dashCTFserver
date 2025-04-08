@@ -1,4 +1,4 @@
-import type { Course, Module } from "@/types/course"
+import type { Course, Module } from "@/services/types/course"
 
 // Données de démonstration pour les cours
 const mockCourses: Course[] = [

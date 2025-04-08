@@ -1,4 +1,4 @@
-import type { Course, Module, QuizQuestion } from "@/types/course"
+import type { Course, Module, QuizQuestion } from "@/services/types/course"
 import apiClient, { apiAdmin } from "./api-client"
 
 // Type pour les réponses de quiz

@@ -1,4 +1,4 @@
-import type { Course } from "@/types/course"
+import type { Course } from "@/services/types/course"
 
 // This is a mock function. In a real application, this would fetch data from an API or database.
 export async function getCourseById(id: string): Promise<Course | null> {
