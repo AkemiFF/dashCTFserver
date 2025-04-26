@@ -30,13 +30,18 @@ import Link from "next/link"
 import { useState } from "react"
 
 interface SearchResultsProps {
+
+  results?: Developer[]
+
+  onSelect?: (id: string | null) => void
+
+  clearSearch?: () => void
   developers: Developer[]
   isLoading: boolean
-  showFilters: boolean
   searchQuery: string
 }
 
-export function SearchResults({ developers, isLoading, showFilters, searchQuery }: SearchResultsProps) {
+export function SearchResults({ developers, isLoading, searchQuery }: SearchResultsProps) {
   const [expandedDeveloper, setExpandedDeveloper] = useState<string | null>(null)
   const { toast } = useToast()
 
