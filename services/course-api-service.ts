@@ -19,7 +19,7 @@ export const CourseApiService = {
   getAllCourses: async (): Promise<Course[]> => {
     try {
       const response = await apiClient.get("/learn/courses")
-      return response.data
+      return response.data.results
     } catch (error) {
       console.error("Error fetching courses:", error)
       throw error
