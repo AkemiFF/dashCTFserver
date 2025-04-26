@@ -5,7 +5,7 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import '../i18n';
 import './globals.css';
-
+import "./osint.css";
 const MyApp = ({ Component, pageProps }: AppProps) => {
   const router = useRouter();
 

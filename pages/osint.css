@@ -1,0 +1,40 @@
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background-color: rgba(64, 196, 255, 0.6);
+  pointer-events: none;
+}
+
+.particle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.osint-node {
+  transition: all 0.3s ease;
+}
+
+.osint-node:hover {
+  filter: brightness(1.5);
+}
+
+.osint-link {
+  transition: all 0.3s ease;
+}
+
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, rgba(30, 64, 175, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 64, 175, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.glow-effect {
+  filter: drop-shadow(0 0 5px rgba(64, 196, 255, 0.7));
+}

@@ -1,36 +1,73 @@
 "use client"
 
-import { CreatePostCard } from "@/components/create-post-card"
-import { PostCard } from "@/components/post-card"
+import { CourseCard } from "@/components/course-card-home"
 import { Sidebar } from "@/components/sidebar"
-import { StoryCircle } from "@/components/story-circle"
-import { TrendingTopics } from "@/components/trending-topics"
+import { SiteHeader } from "@/components/site-header"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { UserSuggestions } from "@/components/user-suggestions"
-import { authFetch } from "@/lib/api"
-import { BASE_URL } from "@/lib/host"
-import { cn } from "@/lib/utils"
-import { DefaultUserData } from "@/services/types/default"
-import { UserBaseData } from "@/services/types/users"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
-import { AnimatePresence, motion } from "framer-motion"
-import { PlusCircle, Sparkles } from "lucide-react"
+import { motion } from "framer-motion"
+import { AlertCircle, Calendar, Clock } from "lucide-react"
 import { useEffect, useState } from "react"
 
-
+// Import services
+import { challengeService, type Challenge } from "@/services/challenge-service"
+import { CourseApiService } from "@/services/course-api-service"
+import { eventService, type Event } from "@/services/event-service"
+import type { Course } from "@/services/types/course"
+import { userService, type UserProfile } from "@/services/user-service"
 
 export default function Home() {
   const [init, setInit] = useState(false)
-  const [activeView, setActiveView] = useState<"feed" | "discover" | "trending">("feed")
-  const [userData, setData] = useState<UserBaseData>(DefaultUserData)
+  const [newCourses, setNewCourses] = useState<Course[]>([])
+  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([])
+  const [featuredChallenge, setFeaturedChallenge] = useState<Challenge | null>(null)
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([])
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
     initParticlesEngine(async (engine) => {
-      await fetchUserData();
-      await loadSlim(engine);
+      await loadSlim(engine)
     }).then(() => {
       setInit(true)
     })
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+
+        // Fetch all data in parallel for better performance
+        const [courses, featuredChall, events, profile] = await Promise.all([
+          CourseApiService.getAllCourses(),
+          challengeService.getFeaturedChallenge(),
+          eventService.getUpcomingEvents(3), // Get top 3 upcoming events
+          userService.getCurrentUserProfile(),
+        ])
+
+
+        setNewCourses(courses.slice(0, 3))
+        setEnrolledCourses(courses.filter((course) => course.progress > 0))
+        setFeaturedChallenge(featuredChall)
+        setUpcomingEvents(events)
+        setUserProfile(profile)
+      } catch (err) {
+        console.error("Error fetching data:", err)
+        setError("Failed to load data. Please try again.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
   }, [])
 
   const particlesOptions = {
@@ -67,95 +104,6 @@ export default function Home() {
       },
     },
   }
-  const fetchUserData = async () => {
-    try {
-      const response = await authFetch(`${BASE_URL}/api/auth/user/`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-      const userData = await response.json();
-      setData(userData);
-      console.log("User data:", userData);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-  // Sample posts data
-  const posts = [
-    {
-      id: 1,
-      user: {
-        name: "Sophie Martin",
-        avatar: "/placeholder.svg?height=40&width=40",
-        verified: true,
-      },
-      content:
-        "Je viens de terminer mon nouveau projet d'IA ! Tellement excitée de partager les résultats avec vous tous. #IntelligenceArtificielle #Innovation",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 243,
-      comments: 56,
-      shares: 12,
-      timeAgo: "2h",
-      featured: true,
-    },
-    {
-      id: 2,
-      user: {
-        name: "Thomas Dubois",
-        avatar: "/placeholder.svg?height=40&width=40",
-        verified: false,
-      },
-      content:
-        "Magnifique journée pour une randonnée en montagne ! La vue était à couper le souffle. Qui d'autre aime l'aventure en plein air ?",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 187,
-      comments: 32,
-      shares: 8,
-      timeAgo: "4h",
-      featured: false,
-    },
-    {
-      id: 3,
-      user: {
-        name: "Emma Bernard",
-        avatar: "/placeholder.svg?height=40&width=40",
-        verified: true,
-      },
-      content:
-        "Nouveau livre, nouvelle aventure ! Je vous recommande vivement cette lecture passionnante sur l'avenir de la technologie et son impact sur notre société.",
-      likes: 98,
-      comments: 24,
-      shares: 5,
-      timeAgo: "6h",
-      featured: false,
-    },
-    {
-      id: 4,
-      user: {
-        name: "Lucas Moreau",
-        avatar: "/placeholder.svg?height=40&width=40",
-        verified: false,
-      },
-      content:
-        "Qui serait intéressé par un webinaire sur les dernières tendances en développement web ? Je pense organiser quelque chose le mois prochain. #Dev #WebDev #Formation",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 156,
-      comments: 47,
-      shares: 23,
-      timeAgo: "12h",
-      featured: true,
-    },
-  ]
-
-  // Sample stories data
-  const stories = [
-    { id: 1, user: { name: "Marie", avatar: "/placeholder.svg?height=60&width=60" }, active: true },
-    { id: 2, user: { name: "Jean", avatar: "/placeholder.svg?height=60&width=60" }, active: true },
-    { id: 3, user: { name: "Léa", avatar: "/placeholder.svg?height=60&width=60" }, active: true },
-    { id: 4, user: { name: "Paul", avatar: "/placeholder.svg?height=60&width=60" }, active: false },
-    { id: 5, user: { name: "Chloé", avatar: "/placeholder.svg?height=60&width=60" }, active: false },
-    { id: 6, user: { name: "Hugo", avatar: "/placeholder.svg?height=60&width=60" }, active: false },
-  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 text-white relative overflow-hidden">
@@ -190,112 +138,208 @@ export default function Home() {
         />
       </div>
 
-
+      <SiteHeader unreadNotifications={0} />
 
       <main className="container mx-auto px-4 pt-24 pb-16 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
           <div className="hidden lg:block lg:col-span-3 sticky top-24 self-start">
-            <Sidebar userData={userData} />
+            <Sidebar userProfile={userProfile} />
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-6 space-y-6">
-            {/* View Selector */}
-            <div className="flex justify-center mb-6">
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-full p-1 flex">
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "rounded-full px-6",
-                    activeView === "feed" && "bg-gradient-to-r from-pink-500 to-purple-600 text-white",
-                  )}
-                  onClick={() => setActiveView("feed")}
-                >
-                  Pour vous
-                </Button>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "rounded-full px-6",
-                    activeView === "discover" && "bg-gradient-to-r from-pink-500 to-purple-600 text-white",
-                  )}
-                  onClick={() => setActiveView("discover")}
-                >
-                  Découvrir
-                </Button>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "rounded-full px-6",
-                    activeView === "trending" && "bg-gradient-to-r from-pink-500 to-purple-600 text-white",
-                  )}
-                  onClick={() => setActiveView("trending")}
-                >
-                  Tendances
-                </Button>
-              </div>
-            </div>
-
-            {/* Stories */}
-            <div className="relative">
-              <div className="absolute inset-y-0 -left-4 flex items-center">
-                <Button variant="ghost" className="rounded-full w-8 h-8 p-0 bg-white/10 backdrop-blur-md">
-                  <PlusCircle className="h-5 w-5 text-pink-500" />
-                </Button>
-              </div>
-              <div className="overflow-x-auto flex gap-4 py-2 px-6 scrollbar-hide">
-                {stories.map((story) => (
-                  <StoryCircle key={story.id} story={story} />
-                ))}
-              </div>
-            </div>
-
-            {/* Create Post */}
-            <CreatePostCard />
-
-            {/* Featured Post (Larger) */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              {posts
-                .filter((post) => post.featured)
-                .map((post) => (
-                  <div key={post.id} className="mb-8 relative">
-                    <div className="absolute -top-2 -left-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 z-10">
-                      <Sparkles className="h-3 w-3" />
-                      <span>Tendance</span>
-                    </div>
-                    <PostCard post={post} featured={true} />
-                  </div>
-                ))}
+          <div className="lg:col-span-9 space-y-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-8"
+            >
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600">
+                Ethical Hacking Learning Hub
+              </h1>
+              <p className="text-white/70 mt-2">Master cybersecurity skills with hands-on practice</p>
             </motion.div>
 
-            {/* Regular Posts */}
-            <div className="space-y-6">
-              <AnimatePresence>
-                {posts
-                  .filter((post) => !post.featured)
-                  .map((post, index) => (
-                    <motion.div
-                      key={post.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <PostCard post={post} />
-                    </motion.div>
-                  ))}
-              </AnimatePresence>
-            </div>
-          </div>
+            {loading && (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+              </div>
+            )}
 
-          {/* Right Sidebar */}
-          <div className="hidden lg:block lg:col-span-3 space-y-6 sticky top-24 self-start">
-            <TrendingTopics />
-            <UserSuggestions />
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {!loading && !error && (
+              <div className="space-y-8">
+                {/* Featured Challenge */}
+                {featuredChallenge && (
+                  <section>
+                    <h2 className="text-2xl font-semibold mb-4">Featured Challenge</h2>
+                    <Card className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-white/10 overflow-hidden">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-xl">{featuredChallenge.title}</CardTitle>
+                            <CardDescription className="text-white/70 mt-1">
+                              {featuredChallenge.description}
+                            </CardDescription>
+                          </div>
+                          <Badge variant="outline" className="bg-white/10">
+                            {featuredChallenge.points} pts
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          <Badge className="bg-pink-500/20 text-pink-300 hover:bg-pink-500/30">
+                            {featuredChallenge.category}
+                          </Badge>
+                          <Badge className="bg-purple-500/20 text-purple-300 hover:bg-purple-500/30">
+                            {featuredChallenge.difficulty}
+                          </Badge>
+                          {featuredChallenge.tags?.map((tag, index) => (
+                            <Badge key={index} variant="outline" className="bg-white/5">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-white/60 mt-2">
+                          <p>
+                            <span className="font-medium">{featuredChallenge.completions}</span> hackers have completed
+                            this challenge
+                          </p>
+                          {featuredChallenge.estimatedTime && (
+                            <p className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {featuredChallenge.estimatedTime}
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                          Start Challenge
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </section>
+                )}
+
+                {/* My Progress Section */}
+                {enrolledCourses.length > 0 && (
+                  <section>
+                    <h2 className="text-2xl font-semibold mb-4">Continue Learning</h2>
+                    <div className="space-y-4">
+                      {enrolledCourses.map((course) => (
+                        <Card key={course.id} className="bg-white/5 border border-white/10">
+                          <CardHeader>
+                            <CardTitle>{course.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-white/70">Progress</p>
+                              <p className="text-white">{course.progress}%</p>
+                            </div>
+                            <Progress value={course.progress} className="h-2" />
+                          </CardContent>
+                          <CardFooter className="flex justify-between">
+                            <Button variant="link" className="text-pink-400 p-0">
+                              View Course
+                            </Button>
+                            <Button variant="outline" className="border-pink-500 text-pink-400 hover:bg-pink-500/10">
+                              Continue
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* New Courses Section */}
+                <section>
+                  <h2 className="text-2xl font-semibold mb-4">New Courses</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {newCourses.map((course) => (
+                      <CourseCard key={course.id} course={course} />
+                    ))}
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Button variant="link" className="text-pink-400">
+                      View All Courses
+                    </Button>
+                  </div>
+                </section>
+
+                {/* Upcoming Events */}
+                {upcomingEvents.length > 0 && (
+                  <section>
+                    <h2 className="text-2xl font-semibold mb-4">Upcoming Events</h2>
+                    <div className="space-y-4">
+                      {upcomingEvents.map((event) => (
+                        <Card key={event.id} className="bg-white/5 border border-white/10">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <div className="flex-shrink-0 flex flex-col items-center justify-center bg-white/5 p-3 rounded-lg">
+                                <Calendar className="h-5 w-5 text-pink-400" />
+                                <p className="text-xs mt-1 text-white/70">
+                                  {new Date(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                </p>
+                              </div>
+                              <div className="flex-grow">
+                                <h3 className="font-medium">{event.title}</h3>
+                                <div className="flex items-center gap-2 mt-1 text-sm text-white/70">
+                                  <Clock className="h-4 w-4" />
+                                  <span>
+                                    {new Date(event.date).toLocaleTimeString("en-US", {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
+                                  </span>
+                                  {event.duration && <span>• {event.duration}</span>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={event.avatar || "/placeholder.svg"} alt={event.instructor} />
+                                  <AvatarFallback>{event.instructor.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm text-white/70">{event.instructor}</span>
+                              </div>
+                            </div>
+                            {event.description && <p className="mt-3 text-sm text-white/70">{event.description}</p>}
+                            <div className="mt-4 flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-pink-500 text-pink-400 hover:bg-pink-500/10"
+                              >
+                                Register
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    <div className="mt-4 text-center">
+                      <Button variant="link" className="text-pink-400">
+                        View All Events
+                      </Button>
+                    </div>
+                  </section>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>
     </div>
   )
 }
-

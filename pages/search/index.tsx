@@ -2,7 +2,6 @@
 
 import { SearchFilters } from "@/components/search-filters"
 import { SearchInput } from "@/components/search-input"
-import { SearchResults } from "@/components/search-results"
 import { SiteHeader } from "@/components/site-header"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -621,12 +620,12 @@ export default function SearchPage() {
             <div className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
               <Tabs>
                 <TabsContent value="developers" className="mt-0">
-                  <SearchResults
+                  {/* <SearchResults
                     developers={filteredDevelopers}
                     isLoading={isLoading}
                     showFilters={showFilters}
                     searchQuery={debouncedSearchQuery}
-                  />
+                  /> */}
                 </TabsContent>
 
                 <TabsContent value="skills" className="mt-0">
