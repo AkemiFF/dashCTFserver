@@ -16,6 +16,8 @@ import { AlertCircle, Calendar, Clock } from "lucide-react"
 import { useEffect, useState } from "react"
 
 // Import services
+import { authFetch } from "@/lib/api"
+import { BASE_URL } from "@/lib/host"
 import { challengeService, type Challenge } from "@/services/challenge-service"
 import { CourseApiService } from "@/services/course-api-service"
 import { eventService, type Event } from "@/services/event-service"
@@ -31,6 +33,24 @@ export default function Home() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [uData, setuData] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await authFetch(`${BASE_URL}/api/auth/user/`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+        const userData = await response.json();
+        setuData(userData);
+
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData()
+  }, []);
 
   useEffect(() => {
     initParticlesEngine(async (engine) => {
@@ -144,7 +164,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
           <div className="hidden lg:block lg:col-span-3 sticky top-24 self-start">
-            <Sidebar userProfile={userProfile} />
+            <Sidebar userProfile={uData} />
           </div>
 
           {/* Main Content */}
