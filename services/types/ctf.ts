@@ -1,3 +1,33 @@
+export interface CTFChallenge {
+  id: string
+  title: string
+  description: string
+  difficulty: "easy" | "medium" | "hard"
+  points: number
+  challenge_type: ChallengeType
+  categories: ChallengeCategory[]
+  hints: {
+    id: number
+    content: string
+    cost: number
+    is_unlocked: boolean
+  }[]
+  downloadable_files?: {
+    id: number
+    name: string
+    url: string
+    size?: number
+  }[]
+  created_at: string
+  docker_status?: "running" | "stopped" | "error"
+  instance_url?: string
+  instance_ports?: Record<string, string>
+  is_solved?: boolean
+  is_active?: boolean
+  solved_count?: number
+  attempt_count?: number
+  time_limit_minutes?: number
+}
 export interface ChallengeCategory {
   id: number
   name: string
@@ -14,52 +44,15 @@ export interface ChallengeType {
   icon: string
 }
 
-export interface CTFChallenge {
-  id: number
-  title: string
-  description: string
-  points: number
-  difficulty: "easy" | "medium" | "hard"
-  challenge_type: ChallengeType
-  categories: ChallengeCategory[]
-  is_active: boolean
-  is_solved?: boolean
-  solved_count?: number
-  attempt_count?: number
-  created_at: string
-  updated_at: string
-  docker_status?: "pending" | "running" | "stopped" | "error"
-  instance_url?: string
-  instance_ports?: Record<string, number>
-  downloadable_files?: DownloadableFile[]
-  time_limit_minutes?: number
-  hints?: ChallengeHint[]
-}
-
-export interface DownloadableFile {
-  id: number
-  name: string
-  size: number
-  url: string
-  content_type: string
-}
-
-export interface ChallengeHint {
-  id: number
-  content: string
-  cost: number
-  is_unlocked: boolean
-}
-
 export interface ChallengeInstance {
-  id: number
-  challenge_id: number
-  status: "pending" | "running" | "stopped" | "error"
+  id: string
+  challenge_id: string
+  instance_id: string
+  status: "pending" | "starting" | "running" | "error" | "expired" | "processing"
   url?: string
-  ports?: Record<string, number>
+  ports?: Record<string, string>
   created_at: string
   expires_at: string
-  flag?: string
 }
 
 export interface FlagSubmission {
@@ -70,29 +63,43 @@ export interface FlagSubmission {
 export interface FlagSubmissionResult {
   success: boolean
   message: string
-  points_earned?: number
   time_taken?: number
-  first_blood?: boolean
+  first_blood?: number
+  points_earned?: number
 }
 
 export interface CTFLeaderboardEntry {
   user_id: number
   username: string
-  avatar: string
+  avatar_url?: string
   points: number
-  solved_count: number
-  last_solve_time: string
-  rank: number
+  solved_challenges: number
+  last_submission: string
 }
 
 export interface UserChallengeStats {
-  solved_count: number
-  total_count: number
-  points_earned: number
+  total_points: number
+  solved_challenges: number
+  total_challenges: number
   categories: {
     name: string
     solved: number
     total: number
   }[]
+  recent_activities: {
+    challenge_id: string
+    challenge_title: string
+    action: "solved" | "attempted"
+    timestamp: string
+    points?: number
+  }[]
+  solved_count: number
+  total_count: number
+  points_earned: number
 }
 
+export interface DownloadableFile {
+  id: number
+  name: string
+  url: string
+}
