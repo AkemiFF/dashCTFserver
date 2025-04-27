@@ -165,6 +165,19 @@ class CTFService {
       throw error
     }
   }
+
+  async checkInstanceStatus(instanceId: string): Promise<any> {
+    try {
+      const response = await apiClient.get(`${this.baseUrl}/status/${instanceId}/`)
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error("Failed to check instance status")
+      }
+      return response.data
+    } catch (error) {
+      console.error(`Error checking instance status ${instanceId}:`, error)
+      throw error
+    }
+  }
 }
 
 export const ctfService = new CTFService()
