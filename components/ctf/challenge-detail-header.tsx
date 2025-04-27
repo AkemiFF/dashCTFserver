@@ -1,19 +1,25 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { CTFChallenge } from "@/services/types/ctf"
-import { Award, ChevronLeft, Clock, Download, ExternalLink, Flag, Server, Shield, Terminal, Users } from "lucide-react"
+import { motion } from "framer-motion"
+import { Award, ChevronLeft, Clock, Download, Flag, Server, Shield, Users } from "lucide-react"
 import Link from "next/link"
 
 interface ChallengeDetailHeaderProps {
   challenge: CTFChallenge
-  onStartChallenge: () => void
+  instanceUrl: string
   isInstanceRunning: boolean
+  onStartChallenge?: () => void
 }
 
-export function ChallengeDetailHeader({ challenge, onStartChallenge, isInstanceRunning }: ChallengeDetailHeaderProps) {
+export function ChallengeDetailHeader({
+  challenge,
+  instanceUrl,
+  isInstanceRunning,
+  onStartChallenge,
+}: ChallengeDetailHeaderProps) {
   const difficultyColor = {
     easy: "bg-emerald-950 text-emerald-400 border-emerald-800",
     medium: "bg-amber-950 text-amber-400 border-amber-800",
@@ -105,34 +111,13 @@ export function ChallengeDetailHeader({ challenge, onStartChallenge, isInstanceR
             className="flex flex-col gap-3 min-w-[200px]"
           >
             {isInstanceRunning ? (
-              <>
-                <Button
-                  variant="default"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  disabled={!challenge.instance_url}
-                  onClick={() => window.open(challenge.instance_url, "_blank")}
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Accéder au défi
+              <Link href={instanceUrl} className="w-full">
+                <Button variant="default" className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  <Server className="mr-2 h-4 w-4" />
+                  Gérer l'instance
                 </Button>
-
-                {challenge.challenge_type.slug === "ssh" && (
-                  <Button
-                    variant="outline"
-                    className="w-full border-gray-700 text-gray-300 hover:bg-gray-800"
-                    onClick={() => {
-                      const port = Object.values(challenge.instance_ports || {})[0]
-                      navigator.clipboard.writeText(
-                        `ssh -p ${port} user@${new URL(challenge.instance_url || "").hostname}`,
-                      )
-                    }}
-                  >
-                    <Terminal className="mr-2 h-4 w-4" />
-                    Copier la commande SSH
-                  </Button>
-                )}
-              </>
-            ) : (
+              </Link>
+            ) : onStartChallenge ? (
               <Button
                 variant="default"
                 className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
@@ -141,6 +126,16 @@ export function ChallengeDetailHeader({ challenge, onStartChallenge, isInstanceR
                 <Flag className="mr-2 h-4 w-4" />
                 Démarrer le défi
               </Button>
+            ) : (
+              <Link href={instanceUrl} className="w-full">
+                <Button
+                  variant="default"
+                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
+                >
+                  <Flag className="mr-2 h-4 w-4" />
+                  Démarrer le défi
+                </Button>
+              </Link>
             )}
 
             {challenge.downloadable_files && challenge.downloadable_files.length > 0 && (
@@ -155,4 +150,3 @@ export function ChallengeDetailHeader({ challenge, onStartChallenge, isInstanceR
     </div>
   )
 }
-

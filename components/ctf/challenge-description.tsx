@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { CTFChallenge, DownloadableFile } from "@/services/types/ctf"
+import { motion } from "framer-motion"
 import { Download, FileDown, FileText, Lightbulb } from "lucide-react"
+import { useState } from "react"
 
 interface ChallengeDescriptionProps {
   challenge: CTFChallenge
@@ -78,7 +78,7 @@ export function ChallengeDescription({ challenge, onDownloadFile, onUnlockHint }
                       </div>
                       <div>
                         <p className="font-medium text-white">{file.name}</p>
-                        <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
+                        <p className="text-xs text-gray-400">{formatFileSize(file.size || 1)}</p>
                       </div>
                     </div>
 

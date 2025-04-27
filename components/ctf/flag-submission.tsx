@@ -2,16 +2,16 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { FlagSubmissionResult } from "@/services/types/ctf"
-import { AlertCircle, CheckCircle2, Flag, Loader2 } from "lucide-react"
 import confetti from "canvas-confetti"
+import { AnimatePresence, motion } from "framer-motion"
+import { AlertCircle, CheckCircle2, Flag, Loader2 } from "lucide-react"
+import { useState } from "react"
 
 interface FlagSubmissionProps {
-  challengeId: number
+  challengeId: string
   onSubmit: (flag: string) => Promise<FlagSubmissionResult>
 }
 
@@ -100,8 +100,8 @@ export function FlagSubmission({ challengeId, onSubmit }: FlagSubmissionProps) {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
             className={`mt-4 p-4 rounded-lg ${result.success
-                ? "bg-green-900/30 border border-green-800 text-green-300"
-                : "bg-red-900/30 border border-red-800 text-red-300"
+              ? "bg-green-900/30 border border-green-800 text-green-300"
+              : "bg-red-900/30 border border-red-800 text-red-300"
               }`}
           >
             <div className="flex items-start">

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ADMIN_NAME } from "@/lib/host"
-import { Clock, FileText, Plus } from "lucide-react"
+import { Clock, FileText, Plus, Stars } from "lucide-react"
 import Link from "next/link"
 
 interface ModuleCardProps {
@@ -66,13 +66,19 @@ export function ModuleCard({ module }: ModuleCardProps) {
                 Voir les questions
               </Button>
             </Link>
-          ) : (
+          ) : (<>
             <Link href={`${ADMIN_NAME}/quiz/module/${module.id}/add`} passHref>
               <Button variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-1" />
                 Ajouter des quiz
               </Button>
             </Link>
+            <Link href={`${ADMIN_NAME}/quiz/module/${module.id}/generate`} passHref>
+              <Button variant="outline" size="sm">
+                <Stars className="h-4 w-4 mr-1" />
+                Génerer des quiz
+              </Button>
+            </Link></>
           )}
         </div>
       </CardFooter>
