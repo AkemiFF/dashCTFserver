@@ -272,7 +272,7 @@ export default function AddModulePage() {
               className="border-white/10 text-white hover:bg-white/10 flex items-center gap-2"
               asChild
             >
-              <Link href={`${ADMIN_NAME}/modules/generate`}>
+              <Link href={`${ADMIN_NAME}/learn/generate-module`}>
                 <Wand2 className="h-4 w-4" /> Générer avec l'IA
               </Link>
             </Button>

@@ -96,7 +96,11 @@ export default function GenerateModulePage() {
     })
 
     const handleSelectChange = (name: string, value: string) => {
-        setCurrentData((prev) => ({ ...prev, [name]: value }))
+        const selectedCourse = referenceData.courses.find((course) => course.id === value);
+
+        setCurrentData((prev) => ({ ...prev, [name]: value }));
+        setCurrentData((prev) => ({ ...prev, title: selectedCourse?.title || "" }));
+        setCurrentData((prev) => ({ ...prev, duration: selectedCourse?.duration || "" }));
     }
 
     useEffect(() => {
@@ -381,9 +385,18 @@ export default function GenerateModulePage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="courseId">Cours</Label>
-                                    <Select onValueChange={(value) => handleSelectChange("courseId", value)} required>
+                                    <Select
+                                        onValueChange={(value) => {
+                                            handleSelectChange("courseId", value);
+                                        }}
+                                        required
+                                    >
                                         <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                            <SelectValue placeholder="Sélectionnez un cours" />
+                                            <SelectValue>
+                                                {currentData.courseId
+                                                    ? referenceData.courses.find((course) => course.id === currentData.courseId)?.title || "Cours N°" + currentData.courseId
+                                                    : "Sélectionnez un cours"}
+                                            </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent className="bg-navy-900 border-white/10 text-white">
                                             {referenceData.courses.map((course) => (
