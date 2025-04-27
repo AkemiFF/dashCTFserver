@@ -131,8 +131,8 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                   <div className="p-6">
                     <div className="flex flex-wrap gap-2 mb-3">
                       {course.tags?.map((tag) => (
-                        <Badge key={tag} className="bg-white/10 hover:bg-white/20">
-                          {tag}
+                        <Badge key={tag.id} className="bg-white/10 hover:bg-white/20">
+                          {tag.name}
                         </Badge>
                       ))}
                     </div>
@@ -375,7 +375,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                     />
                     <div>
                       <h5 className="font-medium">{course.instructor}</h5>
-                      <p className="text-white/70 text-sm mb-2">Expert en {course.tags?.[0] || "cybersécurité"}</p>
+                      <p className="text-white/70 text-sm mb-2">Expert en {course.tags?.[0].name || "cybersécurité"}</p>
                       <p className="text-white/80 text-sm">
                         Un instructeur expérimenté avec plus de 10 ans d'expérience dans l'industrie. Passionné par
                         l'enseignement et l'aide aux étudiants pour atteindre leurs objectifs d'apprentissage.

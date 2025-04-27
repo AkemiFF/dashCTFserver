@@ -426,8 +426,8 @@ function CourseCard({
                     <div className="flex-1">
                         <div className="flex flex-wrap gap-2 mb-2">
                             {course.tags?.slice(0, 2).map((tag) => (
-                                <Badge key={tag} variant="outline" className="bg-white/5 text-white/70 border-white/10">
-                                    {tag}
+                                <Badge key={tag.id} variant="outline" className="bg-white/5 text-white/70 border-white/10">
+                                    {tag.name}
                                 </Badge>
                             ))}
                             {course.tags?.length > 2 && (
