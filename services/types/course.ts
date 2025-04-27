@@ -82,7 +82,7 @@ export interface Course {
   prerequisites: string
   instructor: string
   image: string
-  tags: string[]
+  tags: { id: string, name: string }[]
   modules: Module[]
   quiz: Quiz
   students: number
