@@ -73,16 +73,16 @@ class CTFService {
   // Soumettre un flag
   async submitFlag(submission: FlagSubmission): Promise<FlagSubmissionResult> {
     try {
-      const response = await apiClient.post(`${this.baseUrl}/challenges/${submission.challenge_id}/submit/`, {
+      const response = await apiClient.post(`${this.baseUrl}/submit-flag/`, {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ flag: submission.flag }),
+        body: JSON.stringify({ challenge_id: submission.challenge_id, submitted_flag: submission.submitted_flag }),
       })
 
       const result = response.data
 
-      if (response.status < 200 || response.status >= 300) {
+      if (response.status < 200) {
         throw new Error(result.message || "Failed to submit flag")
       }
 
