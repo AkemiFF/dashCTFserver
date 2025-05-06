@@ -118,7 +118,7 @@ export default function InstancePage() {
     try {
       const result = await ctfService.submitFlag({
         challenge_id: id,
-        flag,
+        submitted_flag: flag,
       })
 
       // If the flag is correct, update the challenge
