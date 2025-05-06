@@ -57,7 +57,7 @@ export interface ChallengeInstance {
 
 export interface FlagSubmission {
   challenge_id: string
-  flag: string
+  submitted_flag: string
 }
 
 export interface FlagSubmissionResult {
