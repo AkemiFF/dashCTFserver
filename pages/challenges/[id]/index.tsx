@@ -117,27 +117,7 @@ export default function ChallengePage() {
     }
   }
 
-  const handleSubmitFlag = async (flag: string) => {
-    try {
-      const result = await ctfService.submitFlag({
-        challenge_id: id,
-        flag,
-      })
 
-      // If the flag is correct, update the challenge
-      if (result.success && challenge) {
-        setChallenge({
-          ...challenge,
-          is_solved: true,
-        })
-      }
-
-      return result
-    } catch (err) {
-      console.error("Error submitting flag:", err)
-      throw err
-    }
-  }
 
   const particlesOptions = {
     particles: {
