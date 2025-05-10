@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import type { CTFChallenge } from "@/services/types/ctf"
+import { motion } from "framer-motion"
 import { Award, CheckCircle2, ChevronRight, Clock, Lock, Server, Shield, Users } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 interface ChallengeCardProps {
   challenge: CTFChallenge
@@ -16,7 +16,7 @@ interface ChallengeCardProps {
 
 export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-
+  const router = useRouter();
   const difficultyColor = {
     easy: "bg-emerald-950 text-emerald-400 border-emerald-800",
     medium: "bg-amber-950 text-amber-400 border-amber-800",
@@ -115,7 +115,7 @@ export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
           <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-400">
             <div className="flex items-center">
               <Users className="h-3 w-3 mr-1" />
-              <span>{challenge.solved_count || 0} résolutions</span>
+              <span>{challenge.solved_count || 5} résolutions</span>
             </div>
             <div className="flex items-center">
               <Server className="h-3 w-3 mr-1" />
@@ -129,30 +129,28 @@ export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
             )}
             <div className="flex items-center">
               <Shield className="h-3 w-3 mr-1" />
-              <span>{challenge.attempt_count || 0} tentatives</span>
+              <span>{challenge.attempt_count || 1} tentatives</span>
             </div>
           </div>
         </CardContent>
 
         <CardFooter className="pt-0">
-          <Link href={`/challenges/${challenge.id}`} className="w-full">
-            <Button
-              variant="default"
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
-            >
-              {challenge.is_solved ? (
-                <>
-                  Revoir le défi
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Relever le défi
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </Link>
+
+          <Button
+            variant="default"
+            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
+            disabled={challenge.is_solved}
+            onClick={() => router.push(`/challenges/${challenge.id}`)}
+          >
+
+            <>
+              Relever le défi
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </>
+
+          </Button>
+
+
         </CardFooter>
 
         {!challenge.is_active && (

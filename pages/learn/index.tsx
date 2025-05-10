@@ -14,6 +14,7 @@ import { useMemo, useState } from "react"
 // Ajouter l'import pour ProtectedRoute
 import ProtectedRoute from "@/components/protected-route"
 // Ajouter l'import pour useApi
+import { SiteHeader } from "@/components/site-header"
 import { useApi } from "@/hooks/use-api"
 
 // Remplacer les états et useEffect par useApi
@@ -122,6 +123,7 @@ export default function LearnPage() {
         <ProtectedRoute>
             <div className="min-h-screen mt-16 bg-navy-950 text-white">
                 <div className="container mx-auto px-4 py-8">
+                    <SiteHeader unreadNotifications={0} />
                     <div className="space-y-8">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
