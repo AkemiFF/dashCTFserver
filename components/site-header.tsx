@@ -18,13 +18,62 @@ import { Bell, Home, LogOut, Menu, MessageCircle, Search, Shield, Terminal, Trop
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+type Skill = {
+  name: string
+  icon: string | null
+  type: "technical" | "methodology" | string
+}
 
+type User = {
+  id: string
+  username: string
+  name: string
+  email: string
+  avatar: string
+  role: string
+  points: number
+  skills: Skill[]
+  is_staff: boolean
+  is_active: boolean
+  date_joined: string
+  last_login: string
+  followers_count: number
+  following_count: number
+  post_count: number
+}
 export function SiteHeader({ unreadNotifications }: { unreadNotifications: number }) {
   const pathname = usePathname()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const unreadNotificationsCount = 5 // This would normally come from a state or context
-  const [userData, setUserData] = useState<{ avatar: string }>({ avatar: "" })
+  const [userData, setUserData] = useState<User>({
+    "id": "22f3003c-b0ad-4a06-a87d-0c9eed00891d",
+    "username": "akemi",
+    "name": "Homura",
+    "email": "akemi@gmail.com",
+    "avatar": "http://localhost:8000/media/profile_photos/hat.jpg",
+    "role": "administrator",
+    "points": 550,
+    "skills": [
+      {
+        "name": "Cybersécurité",
+        "icon": null,
+        "type": "technical"
+      },
+      {
+        "name": "DevOps",
+        "icon": null,
+        "type": "methodology"
+      }
+    ],
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-03-22T14:48:12Z",
+    "last_login": "2025-05-10T20:22:46Z",
+    "followers_count": 0,
+    "following_count": 0,
+    "post_count": 0
+  })
 
   useEffect(() => {
     UserApiService.fetchUserData().then((data) => { setUserData(data) })
@@ -87,19 +136,10 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                 <Home className="h-4 w-4" />
                 <span className="text-sm">Home</span>
               </Link>
-              {/* <Link
-                href="/messages"
-                className={`px-3 py-2 rounded-full flex items-center gap-2 transition-colors relative ${pathname === "/messages" ? "bg-white/10 text-pink-400" : "text-white hover:bg-white/5"}`}
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span className="text-sm">Messages</span>
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-pink-500 text-white text-xs">
-                  3
-                </Badge> 
-              </Link>*/}
+
               <Link
                 href="/learn"
-                className={`px-3 py-2 rounded-full flex items-center gap-2 transition-colors ${pathname === "/leaderboard" ? "bg-white/10 text-pink-400" : "text-white hover:bg-white/5"}`}
+                className={`px-3 py-2 rounded-full flex items-center gap-2 transition-colors ${pathname === "/learn" ? "bg-white/10 text-pink-400" : "text-white hover:bg-white/5"}`}
               >
                 <Trophy className="h-4 w-4" />
                 <span className="text-sm">Learn</span>
@@ -139,8 +179,8 @@ export function SiteHeader({ unreadNotifications }: { unreadNotifications: numbe
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-medium">John Doe</div>
-                        <div className="text-xs text-gray-400">@johndoe</div>
+                        <div className="font-medium">{userData?.username}</div>
+                        <div className="text-xs text-gray-400">{userData?.name}</div>
                       </div>
                     </div>
                   </div>
