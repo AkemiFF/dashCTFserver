@@ -1,12 +1,11 @@
 import { BASE_URL } from "@/lib/host"
 import type {
   CTFChallenge,
-  CTFLeaderboardEntry,
   ChallengeInstance,
   DownloadableFile,
   FlagSubmission,
   FlagSubmissionResult,
-  UserChallengeStats,
+  UserChallengeStats
 } from "@/services/types/ctf"
 import apiClient from "./api-client"
 
@@ -138,19 +137,6 @@ class CTFService {
     }
   }
 
-  // Récupérer le classement
-  async getLeaderboard(): Promise<CTFLeaderboardEntry[]> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/leaderboard/`)
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error("Failed to fetch leaderboard")
-      }
-      return response.data
-    } catch (error) {
-      console.error("Error fetching leaderboard:", error)
-      throw error
-    }
-  }
 
   // Récupérer les statistiques de l'utilisateur
   async getUserStats(): Promise<UserChallengeStats> {
