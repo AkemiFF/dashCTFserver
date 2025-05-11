@@ -55,6 +55,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
   const isMultipleAnswer = Array.isArray(currentQuestion?.correctAnswer)
   const [selectedAnswersPerQuestion, setSelectedAnswersPerQuestion] = useState<Record<string, string[]>>({});
   const [openEndedAnswers, setOpenEndedAnswers] = useState<Record<string, string>>({});
+  const [enoughPoints, setEnoughPoints] = useState(false);
   // Timer effect
   useEffect(() => {
     const timer = setInterval(() => {
@@ -587,7 +588,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
                 const scoreData = calculateTotalScore();
                 const hasOpenEnded = scoreData.openEndedCount > 0;
                 const finalScore = Math.round((scoreData.totalScore / scoreData.totalCount) * 20);
-
+                setEnoughPoints(finalScore >= 10);
                 return (
                   <>
                     {/* Afficher un message si certaines réponses ouvertes ne sont pas encore évaluées */}
@@ -692,6 +693,16 @@ const QuizSection: React.FC<QuizSectionProps> = ({
                         <p className="text-sm">Enregistrement de vos résultats...</p>
                       </div>
                     )}
+                    {!enoughPoints && (
+                      <div className="mt-4 p-2 bg-secondary/10 rounded-md">
+                        <p className="text-lg text-red-500">Les points obtenues aux quizzs ne sont pas suffisant</p>
+                      </div>
+                    )}
+                    {enoughPoints && (
+                      <div className="mt-4 p-2 bg-secondary/10 rounded-md">
+                        <p className="text-lg text-green-500">Vous allez obtenir <g>50 points</g> en finissant la module</p>
+                      </div>
+                    )}
                   </>
                 );
               })()}
@@ -703,7 +714,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
               <RotateCcw className="mr-2 h-4 w-4" />
               Recommencer le quiz
             </Button>
-            {onCompleteModule && (
+            {onCompleteModule && enoughPoints && (
               <Button onClick={handleCompleteModule} className="w-full sm:w-auto" disabled={isSubmittingAttempt}>
                 Terminer le module
               </Button>
