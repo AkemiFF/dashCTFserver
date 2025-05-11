@@ -1,7 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, Target, Calendar, Award } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Award, Calendar, Target, Trophy } from "lucide-react"
 
 interface User {
   id: string
@@ -43,14 +43,13 @@ export function UserDialog({ user, onClose }: UserDialogProps) {
                 <Badge
                   variant="outline"
                   className={`
-                    ${
-                      user.category === "S"
-                        ? "text-yellow-400 border-yellow-400/20"
-                        : user.category === "A"
-                          ? "text-purple-400 border-purple-400/20"
-                          : user.category === "B"
-                            ? "text-blue-400 border-blue-400/20"
-                            : "text-gray-400 border-gray-400/20"
+                    ${user.category === "S"
+                      ? "text-yellow-400 border-yellow-400/20"
+                      : user.category === "A"
+                        ? "text-purple-400 border-purple-400/20"
+                        : user.category === "B"
+                          ? "text-blue-400 border-blue-400/20"
+                          : "text-gray-400 border-gray-400/20"
                     }
                   `}
                 >
@@ -75,7 +74,7 @@ export function UserDialog({ user, onClose }: UserDialogProps) {
                 <Target className="w-4 h-4 text-green-500" />
                 <span className="text-gray-400">Taux de Réussite</span>
               </div>
-              <div className="text-2xl font-bold text-green-400">{user.successRate}%</div>
+              <div className="text-2xl font-bold text-green-400">90%</div>
             </div>
           </div>
 
