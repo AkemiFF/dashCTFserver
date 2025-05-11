@@ -396,7 +396,7 @@ function CourseCard({
     translateLevel: (level: string) => string
 }) {
     const [pointsEarn, setPointsEarn] = useState(() => {
-        return course.progress === 100 ? 0 : course.nb_modules * 50 || 0;
+        return course.progress === 100 ? 0 : (course.nb_modules ? (course.nb_modules * 50) : 0) || 0;
     });
     // if (course.progress == 100) {
     //     setPointsEarn(0)
