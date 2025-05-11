@@ -395,6 +395,12 @@ function CourseCard({
     onClick: () => void
     translateLevel: (level: string) => string
 }) {
+    const [pointsEarn, setPointsEarn] = useState(() => {
+        return course.progress === 100 ? 0 : course.nb_modules * 50 || 0;
+    });
+    // if (course.progress == 100) {
+    //     setPointsEarn(0)
+    // } 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -408,6 +414,12 @@ function CourseCard({
             >
                 <div className="relative">
                     <img src={course.image || "/placeholder.svg"} alt={course.title} className="w-full h-48 object-cover" />
+                    <div className="absolute top-0 left-0 right-0  px-4 py-2">
+                        <div className="flex justify-between items-center text-sm">
+
+                            <Badge className="bg-gradient-to-r from-pink-500 to-purple-600">{pointsEarn} pts</Badge>
+                        </div>
+                    </div>
                     {course.progress > 0 && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-4 py-2">
                             <div className="flex justify-between items-center text-sm">
