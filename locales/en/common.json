@@ -1,0 +1,105 @@
+{
+    "title": "NexusCraft - Digital Innovation Agency",
+    "description": "Crafting exceptional digital experiences",
+    "nav": {
+        "home": "Home",
+        "services": "Services",
+        "projects": "Projects",
+        "about": "About",
+        "contact": "Contact"
+    },
+    "hero": {
+        "subtitle": "Digital Innovation Agency",
+        "title": "Crafting Digital Excellence",
+        "description": "NexusCraft is a premier web development agency specializing in creating exceptional digital experiences. We transform ideas into powerful, scalable web solutions.",
+        "cta": {
+            "start": "Start Your Project",
+            "view": "View Our Work"
+        },
+        "imageAlt": "NexusCraft Projects Showcase"
+    },
+    "stats": {
+        "projects": "Projects Delivered",
+        "satisfaction": "Client Satisfaction",
+        "developers": "Expert Developers"
+    },
+    "services": {
+        "title": "Our Services",
+        "description": "We offer a comprehensive suite of digital services to help your business thrive in the modern web landscape.",
+        "webDevelopment": {
+            "title": "Web Development",
+            "description": "Custom web applications built with cutting-edge technologies and best practices."
+        },
+        "uiUxDesign": {
+            "title": "UI/UX Design",
+            "description": "Intuitive and engaging user interfaces that deliver exceptional user experiences."
+        },
+        "securitySolutions": {
+            "title": "Security Solutions",
+            "description": "Robust security implementations to protect your digital assets and data."
+        },
+        "performanceOptimization": {
+            "title": "Performance Optimization",
+            "description": "Speed optimization and performance tuning for lightning-fast applications."
+        },
+        "teamAugmentation": {
+            "title": "Team Augmentation",
+            "description": "Skilled developers ready to join your team and accelerate your projects."
+        },
+        "digitalInnovation": {
+            "title": "Digital Innovation",
+            "description": "Innovative solutions that keep you ahead of the digital curve."
+        }
+    },
+    "projects": {
+        "title": "Our Projects",
+        "description": "Explore our portfolio of innovative digital solutions that have helped businesses thrive in the digital landscape.",
+        "shoplg": {
+            "title": "ShopLG",
+            "description": "A fully responsive e-commerce solution featuring advanced search, dynamic filtering, and seamless checkout powered by Stripe integration. Built for performance and user experience."
+        },
+        "portfolio": {
+            "title": "Portfolio",
+            "description": "A personal portfolio showcasing projects, technical expertise, and creative solutions using modern web technologies."
+        },
+        "aftrip": {
+            "title": "Aftrip",
+            "description": "Aftrip offers a curated travel experience for those seeking authentic and responsible tourism. Discover hidden cultural treasures, unique hotels, artisanal products, and personalized trips designed by local experts."
+        }
+    },
+    "team": {
+        "title": "Meet Our Team",
+        "description": "Our diverse team of experts is passionate about crafting exceptional digital experiences.",
+        "mirado": {
+            "name": "Jason Brad Mirado",
+            "role": "Founder & Full Stack Developer",
+            "bio": "A visionary tech entrepreneur with over 5 years of experience in full-stack web development, digital strategy, and innovative solutions."
+        },
+        "cherica": {
+            "name": "Riantsoa Chérica",
+            "role": "Backend Developer & Integrator",
+            "bio": "A dedicated backend developer with expertise in API design and seamless integration, committed to crafting robust, scalable systems."
+        },
+        "leomyre": {
+            "name": "Léomyre",
+            "role": "Full-stack Developer",
+            "bio": "A full-stack developer focused on scalable architecture, performance optimization, and delivering user-friendly web applications."
+        }
+    },
+    "contact": {
+        "title": "Get in Touch",
+        "description": "Ready to start your next project? Contact us for a free consultation.",
+        "info": "Contact Information",
+        "infodescription": "Reach out to us through any of these channels",
+        "form": {
+            "name": "Your Name",
+            "email": "Your Email",
+            "subject": "Subject",
+            "message": "Your Message",
+            "submit": "Send Message"
+        }
+    },
+    "footer": {
+        "copyright": "© 2024 NexusCraft. All rights reserved."
+    }
+}

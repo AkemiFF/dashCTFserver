@@ -1,0 +1,105 @@
+{
+    "title": "NexusCraft - Agence d'Innovation Digitale",
+    "description": "Création d'expériences digitales exceptionnelles",
+    "nav": {
+        "home": "Accueil",
+        "services": "Services",
+        "projects": "Projets",
+        "about": "À propos",
+        "contact": "Contact"
+    },
+    "hero": {
+        "subtitle": "Agence d'Innovation Digitale",
+        "title": "Maîtriser l'Excellence Digitale",
+        "description": "NexusCraft est une agence de développement web de premier plan spécialisée dans la création d'expériences digitales exceptionnelles. Nous transformons vos idées en solutions web puissantes et évolutives.",
+        "cta": {
+            "start": "Démarrer Votre Projet",
+            "view": "Voir Nos Réalisations"
+        },
+        "imageAlt": "Présentation des projets NexusCraft"
+    },
+    "stats": {
+        "projects": "Projets Livrés",
+        "satisfaction": "Satisfaction Client",
+        "developers": "Développeurs Experts"
+    },
+    "services": {
+        "title": "Nos Services",
+        "description": "Nous proposons une gamme complète de services digitaux pour aider votre entreprise à prospérer dans le paysage numérique moderne.",
+        "webDevelopment": {
+            "title": "Développement Web",
+            "description": "Applications web personnalisées utilisant des technologies de pointe et des meilleures pratiques."
+        },
+        "uiUxDesign": {
+            "title": "Conception UI/UX",
+            "description": "Interfaces utilisateur intuitives et engageantes offrant des expériences utilisateur exceptionnelles."
+        },
+        "securitySolutions": {
+            "title": "Solutions de Sécurité",
+            "description": "Implémentations de sécurité robustes pour protéger vos actifs numériques et vos données."
+        },
+        "performanceOptimization": {
+            "title": "Optimisation des Performances",
+            "description": "Optimisation de la vitesse et réglage des performances pour des applications ultra-rapides."
+        },
+        "teamAugmentation": {
+            "title": "Augmentation d'Équipe",
+            "description": "Développeurs qualifiés prêts à rejoindre votre équipe et à accélérer vos projets."
+        },
+        "digitalInnovation": {
+            "title": "Innovation Digitale",
+            "description": "Solutions innovantes pour vous garder en avance dans le monde numérique."
+        }
+    },
+    "projects": {
+        "title": "Nos Projets",
+        "description": "Découvrez notre portfolio de solutions innovantes qui ont permis à nos clients de réussir dans le monde digital.",
+        "shoplg": {
+            "title": "ShopLG",
+            "description": "Une solution e-commerce entièrement responsive avec recherche avancée, filtrage dynamique et paiement transparent grâce à l'intégration Stripe. Conçu pour la performance et l'expérience utilisateur."
+        },
+        "portfolio": {
+            "title": "Portfolio",
+            "description": "Un portfolio personnel présentant des projets, des compétences techniques et des solutions créatives utilisant des technologies web modernes."
+        },
+        "aftrip": {
+            "title": "Aftrip",
+            "description": "Aftrip propose des expériences de voyage authentiques et responsables. Découvrez des trésors culturels cachés, des hôtels uniques, des produits artisanaux et des voyages personnalisés conçus par des experts locaux."
+        }
+    },
+    "team": {
+        "title": "Rencontrez Notre Équipe",
+        "description": "Notre équipe diversifiée d'experts est passionnée par la création d'expériences digitales exceptionnelles.",
+        "mirado": {
+            "name": "Jason Brad Mirado",
+            "role": "Fondateur & Développeur Full Stack",
+            "bio": "Un entrepreneur visionnaire avec plus de 5 ans d'expérience en développement full-stack, stratégie numérique et solutions innovantes."
+        },
+        "cherica": {
+            "name": "Riantsoa Chérica",
+            "role": "Développeur Backend & Intégrateur",
+            "bio": "Un développeur backend passionné, spécialisé dans la conception d'API et l'intégration fluide, engagé à créer des systèmes robustes et évolutifs."
+        },
+        "leomyre": {
+            "name": "Léomyre",
+            "role": "Développeur Full Stack",
+            "bio": "Un développeur full-stack axé sur l'optimisation des performances, l'architecture évolutive et des applications web conviviales."
+        }
+    },
+    "contact": {
+        "title": "Contactez-Nous",
+        "description": "Prêt à lancer votre prochain projet ? Contactez-nous pour une consultation gratuite.",
+        "info": "Informations de Contact",
+        "infodescription": "Contactez-nous via l'un de ces canaux",
+        "form": {
+            "name": "Votre Nom",
+            "email": "Votre Email",
+            "subject": "Sujet",
+            "message": "Votre Message",
+            "submit": "Envoyer"
+        }
+    },
+    "footer": {
+        "copyright": "© 2024 NexusCraft. Tous droits réservés."
+    }
+}
