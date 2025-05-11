@@ -88,5 +88,6 @@ export interface Course {
   students: number
   rating: number
   progress: number
+  nb_modules: number
 }
 
