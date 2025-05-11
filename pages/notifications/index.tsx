@@ -2,6 +2,7 @@
 
 import { NotificationsFilter } from "@/components/notifications-filter"
 import { NotificationsList } from "@/components/notifications-list"
+import { SiteHeader } from "@/components/site-header"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
@@ -271,6 +272,7 @@ const NotificationsPage: NextPage = () => {
       {/* Particles Background */}
       {init && <Particles id="tsparticles" options={particlesOptions} className="absolute inset-0 z-0" />}
 
+      <SiteHeader unreadNotifications={0} />
       <div className="relative z-10 container mx-auto px-4 py-8 pt-20">
         {/* Header */}
         <motion.div
