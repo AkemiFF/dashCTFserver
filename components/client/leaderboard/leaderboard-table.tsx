@@ -3,7 +3,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { gamificationService } from "@/services/gamification"
+import { useEffect, useState } from "react"
 import { UserDialog } from "./user-dialog"
 
 interface User {
@@ -160,9 +161,15 @@ interface LeaderboardTableProps {
 
 export function LeaderboardTable({ rank }: LeaderboardTableProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
-
-  const filteredUsers = rank === "all" ? mockUsers : mockUsers.filter((user) => user.category === rank)
-
+  const [leaderboard, setLeaderboard] = useState<User[]>([])
+  const filteredUsers = rank === "all" ? leaderboard : leaderboard.filter((user) => user.category === rank)
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const leaderboard = await gamificationService.getLeaderboard();
+      setLeaderboard(leaderboard);
+    }
+    fetchLeaderboard()
+  }, []);
   return (
     <>
       <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
@@ -172,7 +179,6 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
           <div className="col-span-3">Utilisateur</div>
           <div className="col-span-2">Points</div>
           <div className="col-span-2">Défis Complétés</div>
-          <div className="col-span-2">Taux de Réussite</div>
           <div className="col-span-2">Actions</div>
         </div>
 
@@ -196,14 +202,13 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
                 <Badge
                   variant="outline"
                   className={`
-                    ${
-                      user.category === "S"
-                        ? "text-yellow-400 border-yellow-400/20"
-                        : user.category === "A"
-                          ? "text-purple-400 border-purple-400/20"
-                          : user.category === "B"
-                            ? "text-blue-400 border-blue-400/20"
-                            : "text-gray-400 border-gray-400/20"
+                    ${user.category === "S"
+                      ? "text-yellow-400 border-yellow-400/20"
+                      : user.category === "A"
+                        ? "text-purple-400 border-purple-400/20"
+                        : user.category === "B"
+                          ? "text-blue-400 border-blue-400/20"
+                          : "text-gray-400 border-gray-400/20"
                     }
                   `}
                 >
@@ -220,10 +225,7 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
                   <div className="text-gray-400">Défis</div>
                   <div>{user.completedChallenges}</div>
                 </div>
-                <div>
-                  <div className="text-gray-400">Réussite</div>
-                  <div>{user.successRate}%</div>
-                </div>
+
               </div>
 
               <Button
@@ -237,7 +239,7 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
 
             {/* Desktop View */}
             <div className="col-span-1 font-mono text-gray-400 hidden md:block">#{user.rank}</div>
-            <div className="col-span-3 flex items-center gap-3 hidden md:flex">
+            <div className="col-span-3 flex items-center gap-3  md:flex">
               <Avatar>
                 <AvatarImage src={user.avatar} />
                 <AvatarFallback>{user.name[0]}</AvatarFallback>
@@ -247,14 +249,13 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
                 <Badge
                   variant="outline"
                   className={`
-                    ${
-                      user.category === "S"
-                        ? "text-yellow-400 border-yellow-400/20"
-                        : user.category === "A"
-                          ? "text-purple-400 border-purple-400/20"
-                          : user.category === "B"
-                            ? "text-blue-400 border-blue-400/20"
-                            : "text-gray-400 border-gray-400/20"
+                    ${user.category === "S"
+                      ? "text-yellow-400 border-yellow-400/20"
+                      : user.category === "A"
+                        ? "text-purple-400 border-purple-400/20"
+                        : user.category === "B"
+                          ? "text-blue-400 border-blue-400/20"
+                          : "text-gray-400 border-gray-400/20"
                     }
                   `}
                 >
@@ -266,7 +267,6 @@ export function LeaderboardTable({ rank }: LeaderboardTableProps) {
               {user.points.toLocaleString()} pts
             </div>
             <div className="col-span-2 text-gray-400 hidden md:block">{user.completedChallenges}</div>
-            <div className="col-span-2 text-gray-400 hidden md:block">{user.successRate}%</div>
             <div className="col-span-2 hidden md:block">
               <Button
                 variant="ghost"
